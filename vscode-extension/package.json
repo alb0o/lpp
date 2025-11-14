@@ -1,9 +1,9 @@
 {
     "name": "lpp-language",
-    "displayName": "LPP Language Support",
+    "displayName": "LPP - Light Programming Language",
     "description": "Language support for LPP with syntax highlighting, error detection, and build integration",
     "version": "0.1.0",
-    "publisher": "lpp",
+    "publisher": "alb0",
     "engines": {
         "vscode": "^1.80.0"
     },
