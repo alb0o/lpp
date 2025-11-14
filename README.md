@@ -1,93 +1,55 @@
-# LPP - Modern Systems Programming Language# LPP - Light Programming Language
+# LPP — Light Programming Language
 
+<div align="center">
 
+**A statically-typed systems language with modern syntax that transpiles to C++**
 
-<div align="center">Un linguaggio di programmazione minimalista che transpila in C++.
+[Documentation](docs/) • [Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/FULL_SPEC.md) • [Examples](examples/)
 
+</div>
 
+---
 
-**A statically-typed systems language with modern syntax that transpiles to C++**## Struttura del Progetto
+## ✨ Features
 
+- ��� **Memory Safety** — Clang-inspired static analysis with CFG and data-flow tracking
+- ⚡ **High Performance** — Transpiles to optimized C++
+- ��� **Modern Syntax** — Clean, expressive, Rust/JS-inspired
+- ���️ **Static Analysis** — Path-sensitive analysis detects bugs before compilation
+- ��� **VS Code Integration** — Syntax highlighting + real-time errors
+- ��� **ES6+ Constructs** — Arrow functions, destructuring, spread, and more
 
+## ��� Project Structure
 
-[Documentation](docs/) • [Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/FULL_SPEC.md) • [Examples](examples/)```
-
+```
 lpp/
-
-</div>├── src/           # Sorgenti del compilatore
-
+├── src/           # Compiler source code
 ├── include/       # Header files
-
----├── examples/      # Programmi di esempio in LPP
-
+├── stdlib/        # Minimal standard library
+├── examples/      # Sample LPP programs
 ├── tests/         # Test suite
+├── docs/          # Documentation
+└── README.md
+```
 
-## ✨ Features├── docs/          # Documentazione
+## ��� Quick Start
 
-├── stdlib/        # Libreria standard minimale
+### Installation
 
-- 🔒 **Memory Safe** - Rust-inspired ownership model with borrow checking└── README.md
+Download a release or build from source:
 
-- ⚡ **Performance** - Compiles to optimized C++ code```
-
-- 🎯 **Modern Syntax** - Clean, expressive syntax inspired by Rust and JavaScript
-
-- 🛡️ **Static Analysis** - Catch bugs before compilation with Clang-style analyzer## Fasi di Sviluppo
-
-- 🔧 **VS Code Integration** - Full IDE support with syntax highlighting and error detection
-
-- 📦 **ES6+ Features** - Arrow functions, destructuring, spread operators, and more1. ✅ Definizione del core del linguaggio
-
-2. ⏳ Specifica della sintassi (EBNF minima)
-
-## 🚀 Quick Start3. ⏳ Progettazione del lexer (token)
-
-4. ⏳ Progettazione del parser (AST)
-
-### Installation5. ⏳ Definizione dell'AST ufficiale
-
-6. ⏳ Implementazione parser completo
-
-Download the latest release or build from source:7. ⏳ Implementazione transpiler C++
-
-8. ⏳ Integrazione compilazione (Clang)
-
-```bash9. ⏳ Aggiunta stdlib minimale
-
-git clone https://github.com/yourusername/lpp-lang.git10. ⏳ Costruzione CLI (lppc)
-
-cd lpp-lang
-
-cmake -B build## Build
-
+```bash
+git clone https://github.com/alb0084/lpp.git
+cd lpp
+cmake -B build
 cmake --build build --config Release
+```
 
-``````bash
+Compiler output:
+- **Windows** → `build/Release/lppc.exe`
+- **Unix** → `build/lppc`
 
-# TBD - Da definire con CMake o Makefile
-
-The compiler will be available at `build/Release/lppc.exe` (Windows) or `build/lppc` (Unix).```
-
-
-
-### VS Code Extension## Utilizzo
-
-
-
-Install the VS Code extension for syntax highlighting and error detection:```bash
-
-lppc input.lpp -o output
-
-```bash```
-
-code --install-extension vscode-extension/lpp-language-0.1.0.vsix
-
-```## Licenza
-
-
-
-### Your First ProgramTBD
-
+### Your First Program
 
 Create `hello.lpp`:
 
@@ -98,49 +60,40 @@ fn main() -> int {
 }
 ```
 
-Compile and run:
+Compile & run:
 
 ```bash
 lppc hello.lpp
 ./hello
 ```
 
-## 📖 Language Overview
+## ��� Language Overview
 
-### Variables and Types
+### Variables & Types
 
 ```lpp
-// Immutable by default (Rust-style)
-let x = 42;
-
-// Mutable variables need 'mut' keyword
-let mut counter = 0;
+let x = 42;           // immutable by default
+let mut counter = 0;  // mutable
 counter = counter + 1;
 
-// Type annotations (optional with inference)
-let name: string = "LPP";
+let name: string = "LPP";   // explicit types
 let pi: float = 3.14159;
 ```
 
 ### Functions
 
 ```lpp
-// Function with type annotations
 fn add(a: int, b: int) -> int {
     return a + b;
 }
 
-// Arrow functions (ES6-style)
-let multiply = (x, y) => x * y;
-
-// Lambda expressions
-let squares = numbers.map(|x| x * x);
+let multiply = (x, y) => x * y;   // arrow functions
+let squares = numbers.map(|n| n*n);
 ```
 
 ### Control Flow
 
 ```lpp
-// If-else
 if (x > 0) {
     println("positive");
 } else if (x < 0) {
@@ -149,63 +102,52 @@ if (x > 0) {
     println("zero");
 }
 
-// Ternary operator
-let result = x > 0 ? "positive" : "negative";
-
-// Pattern matching (planned)
-match value {
-    0 => "zero",
-    1..10 => "small",
-    _ => "large"
-}
+let result = x > 0 ? "positive" : "negative";  // ternary
 ```
 
 ### Modern Features
 
 ```lpp
-// Destructuring
-let [first, second, ...rest] = array;
+let [a, b, ...rest] = array;    // destructuring
 let {x, y} = point;
 
-// Spread operator
-let combined = [...array1, ...array2];
-let merged = {...obj1, ...obj2};
+let combined = [...a1, ...a2];  // spread
+let merged = {...o1, ...o2};
 
-// Optional chaining
-let city = user?.address?.city;
-
-// Null coalescing
-let name = user?.name ?? "Unknown";
+let city = user?.address?.city;       // optional chaining
+let username = user?.name ?? "Anon";  // null coalescing
 ```
 
-## 🛡️ Static Analysis
+## ���️ Static Analysis
 
-LPP includes a powerful static analyzer that catches bugs before compilation:
+LPP includes a built-in analyzer that catches issues before compilation:
+
+### Example
 
 ```lpp
 fn example() -> int {
     let x;
-    let y = x + 10;  // ERROR: Use of uninitialized variable 'x'
-    
-    let z = 10 / 0;  // ERROR: Division by zero detected
-    
+    let y = x + 10;    // ERROR: uninitialized variable
+
+    let z = 10 / 0;    // ERROR: division by zero
+
     return 0;
-    println("unreachable");  // WARNING: Dead code detected
+    println("unreachable"); // WARNING: dead code
 }
 ```
 
-### Analysis Features
+### Analyzer Capabilities
 
 - ✅ Division by zero detection
-- ✅ Uninitialized variable reads
+- ✅ Uninitialized variable use
 - ✅ Dead code detection
-- ✅ Null pointer dereference
+- ✅ Null dereference checks
 - ✅ Memory leak detection
 - ✅ Integer overflow warnings
 
-## 🏗️ Architecture
+## ���️ Architecture
 
-LPP uses a multi-stage compilation pipeline:
+LPP uses a multi-stage pipeline:
 
 ```
 Source Code (.lpp)
@@ -214,65 +156,63 @@ Lexer (Tokenization)
     ↓
 Parser (AST Construction)
     ↓
-Static Analyzer (Bug Detection)
+Static Analyzer (CFG + Data-Flow)
     ↓
-Transpiler (C++ Generation)
+C++ Transpiler
     ↓
 g++/clang (Native Compilation)
     ↓
 Executable
 ```
 
-See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed information.
+Details in [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## 📚 Documentation
+## ��� Documentation
 
-- **[Quick Start Guide](docs/QUICKSTART.md)** - Get started in 5 minutes
-- **[Language Specification](docs/FULL_SPEC.md)** - Complete language reference
-- **[Architecture Guide](docs/ARCHITECTURE.md)** - Compiler internals
-- **[Static Analyzer](docs/STATIC_ANALYZER.md)** - Analysis engine details
-- **[ES6+ Features](docs/ES6_FEATURES.md)** - Modern JavaScript features
-- **[Roadmap](docs/ROADMAP.md)** - Future plans
+- **[Quick Start](docs/QUICKSTART.md)**
+- **[Language Specification](docs/FULL_SPEC.md)**
+- **[Architecture Guide](docs/ARCHITECTURE.md)**
+- **[Static Analyzer Details](docs/STATIC_ANALYZER.md)**
+- **[ES6+ Features](docs/ES6_FEATURES.md)**
+- **[Roadmap](docs/ROADMAP.md)**
 
-## 🎯 Use Cases
+## ��� Use Cases
 
-- **Systems Programming** - Low-level performance with high-level syntax
-- **Learning** - Great for understanding compilers and type systems
-- **Rapid Prototyping** - Fast C++ code generation without manual memory management
-- **Embedded Systems** - Compile to efficient C++ for resource-constrained devices
+- **Systems Programming** — Low-level performance, modern syntax
+- **Learning** — Great introduction to compilers and type systems
+- **Rapid Prototyping** — Fast C++ generation without memory headaches
+- **Embedded Development** — Efficient binaries for constrained devices
 
-## 🤝 Contributing
+## ��� Contributing
 
-Contributions are welcome! Please read our contributing guidelines before submitting PRs.
+1. Fork repository
+2. Create feature branch
+3. Commit changes
+4. Push branch
+5. Open Pull Request
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## ��� Examples
 
-## 📝 Examples
+See the [examples/](examples/) directory:
 
-Check out the [examples/](examples/) directory for more:
+- [hello.lpp](examples/hello.lpp)
+- [factorial.lpp](examples/factorial.lpp)
+- [advanced_features.lpp](examples/advanced_features.lpp)
+- [test_complete_es6.lpp](examples/test_complete_es6.lpp)
 
-- [Hello World](examples/hello.lpp)
-- [Factorial](examples/factorial.lpp)
-- [Advanced Features](examples/advanced_features.lpp)
-- [ES6+ Syntax](examples/test_complete_es6.lpp)
+## ��� Related Projects
 
-## 🔗 Related Projects
+- **[LightJS](https://github.com/alb0084/lightjs)** — The original runtime that inspired LPP
 
-- **[LightJS](https://github.com/yourusername/lightjs)** - Modern JavaScript framework (LPP's original use case)
+## ��� License
 
-## 📄 License
+MIT License — see [LICENSE](LICENSE).
 
-MIT License - see [LICENSE](LICENSE) for details.
+## ��� Acknowledgments
 
-## 🙏 Acknowledgments
-
-- Inspired by Rust's ownership model
-- Syntax influenced by JavaScript/TypeScript
-- Static analysis techniques from Clang
+- **Clang Static Analyzer** for CFG-based analysis approach
+- **JavaScript/TypeScript** for syntax inspiration
+- **Rust** for modern language design principles
 
 ---
 
@@ -280,6 +220,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 **Built with ❤️ for modern systems programming**
 
-[⭐ Star on GitHub](https://github.com/yourusername/lpp-lang) • [🐛 Report Bug](https://github.com/yourusername/lpp-lang/issues) • [💡 Request Feature](https://github.com/yourusername/lpp-lang/issues)
+[⭐ Star on GitHub](https://github.com/alb0084/lpp) • [��� Report Bug](https://github.com/alb0084/lpp/issues) • [��� Request Feature](https://github.com/alb0084/lpp/issues)
 
 </div>
