@@ -1,0 +1,405 @@
+// LPP - Advanced Features Demo
+
+// ============================================
+// DESTRUCTURING
+// ============================================
+
+// Array destructuring
+let [a, b, c] = [1, 2, 3]
+let [first, ...rest] = [1, 2, 3, 4, 5]
+
+// Object destructuring
+let person = {name: "Alice", age: 30, city: "NYC"}
+let {name, age} = person
+let {name: userName, age: userAge} = person  // rename
+
+// Nested destructuring
+let data = {
+    user: {name: "Bob", age: 25},
+    items: [1, 2, 3]
+}
+let {user: {name: n, age: a}, items} = data
+
+// Function parameters
+fn greet({name, age}: {name: string, age: int}) -> string {
+    return `Hello ${name}, you are ${age}`
+}
+
+// ============================================
+// SPREAD/REST OPERATORS
+// ============================================
+
+// Array spread
+let arr1 = [1, 2, 3]
+let arr2 = [...arr1, 4, 5, 6]
+let combined = [...arr1, ...arr2]
+
+// Object spread
+let obj1 = {a: 1, b: 2}
+let obj2 = {...obj1, c: 3, d: 4}
+let merged = {...obj1, ...obj2}
+
+// Rest parameters in functions
+fn sum(...numbers: int[]) -> int {
+    return numbers.reduce((a, b) -> a + b, 0)
+}
+
+let total = sum(1, 2, 3, 4, 5)
+
+// ============================================
+// TEMPLATE STRINGS
+// ============================================
+
+let name = "World"
+let age = 25
+
+let message = `Hello, ${name}!`
+let complex = `Name: ${name}, Age: ${age}, Next: ${age + 1}`
+
+let multiline = `
+    This is a
+    multi-line
+    string with ${name}
+`
+
+// ============================================
+// OPTIONAL CHAINING & NULLISH COALESCING
+// ============================================
+
+let user = {
+    profile: {
+        address: {
+            city: "NYC"
+        }
+    }
+}
+
+// Optional chaining
+let city = user?.profile?.address?.city
+let missing = user?.profile?.phone?.number  // undefined, no error
+
+// Nullish coalescing
+let value = possiblyNull ?? "default"
+let port = config?.port ?? 8080
+
+// ============================================
+// ASYNC/AWAIT
+// ============================================
+
+async fn fetchUser(id: int) -> Promise<User> {
+    let response = await fetch(`/api/users/${id}`)
+    let user = await response.json()
+    return user
+}
+
+async fn processUsers() -> void {
+    try {
+        let user1 = await fetchUser(1)
+        let user2 = await fetchUser(2)
+        
+        print(user1.name)
+        print(user2.name)
+    } catch (error) {
+        print("Error:", error)
+    } finally {
+        print("Done")
+    }
+}
+
+// Promise combinators
+async fn getAllUsers() -> User[] {
+    let promises = [fetchUser(1), fetchUser(2), fetchUser(3)]
+    return await Promise.all(promises)
+}
+
+// ============================================
+// CLASSES & OOP
+// ============================================
+
+class Animal {
+    name: string
+    age: int
+    
+    constructor(name: string, age: int) {
+        this.name = name
+        this.age = age
+    }
+    
+    speak() -> void {
+        print(`${this.name} makes a sound`)
+    }
+    
+    get info() -> string {
+        return `${this.name} (${this.age} years old)`
+    }
+    
+    static create(name: string) -> Animal {
+        return new Animal(name, 0)
+    }
+}
+
+class Dog extends Animal {
+    breed: string
+    
+    constructor(name: string, age: int, breed: string) {
+        super(name, age)
+        this.breed = breed
+    }
+    
+    override speak() -> void {
+        print(`${this.name} barks!`)
+    }
+    
+    fetch() -> void {
+        print(`${this.name} is fetching the ball`)
+    }
+}
+
+// Usage
+let dog = new Dog("Rex", 3, "Labrador")
+dog.speak()
+dog.fetch()
+print(dog.info)
+
+// ============================================
+// INTERFACES & ABSTRACT CLASSES
+// ============================================
+
+interface Drawable {
+    draw() -> void
+    getArea() -> float
+}
+
+abstract class Shape {
+    color: string
+    
+    constructor(color: string) {
+        this.color = color
+    }
+    
+    abstract getArea() -> float
+    
+    describe() -> string {
+        return `A ${this.color} shape with area ${this.getArea()}`
+    }
+}
+
+class Circle extends Shape implements Drawable {
+    radius: float
+    
+    constructor(color: string, radius: float) {
+        super(color)
+        this.radius = radius
+    }
+    
+    override getArea() -> float {
+        return 3.14159 * this.radius * this.radius
+    }
+    
+    draw() -> void {
+        print(`Drawing a ${this.color} circle`)
+    }
+}
+
+// ============================================
+// PATTERN MATCHING (MATCH)
+// ============================================
+
+fn processValue(value: any) -> string {
+    match (value) {
+        null -> "is null"
+        undefined -> "is undefined"
+        0 -> "is zero"
+        x if x > 100 -> "very large"
+        x if x > 10 -> "large"
+        x if x < 0 -> "negative"
+        _ -> "normal value"
+    }
+}
+
+// Match with destructuring
+fn processTuple(tuple: [int, int]) -> string {
+    match (tuple) {
+        [0, 0] -> "origin"
+        [0, _] -> "on x-axis"
+        [_, 0] -> "on y-axis"
+        [x, y] if x == y -> "diagonal"
+        [x, y] -> `point at (${x}, ${y})`
+    }
+}
+
+// ============================================
+// GENERICS
+// ============================================
+
+fn identity<T>(value: T) -> T {
+    return value
+}
+
+fn first<T>(arr: T[]) -> T? {
+    return arr.length > 0 ? arr[0] : null
+}
+
+class Box<T> {
+    value: T
+    
+    constructor(value: T) {
+        this.value = value
+    }
+    
+    get() -> T {
+        return this.value
+    }
+    
+    set(value: T) -> void {
+        this.value = value
+    }
+    
+    map<U>(fn: (T) -> U) -> Box<U> {
+        return new Box(fn(this.value))
+    }
+}
+
+let numberBox = new Box(42)
+let stringBox = numberBox.map(n -> `Number: ${n}`)
+
+// ============================================
+// UNION TYPES
+// ============================================
+
+fn processValue(value: string | int | null) -> string {
+    if (typeof value == "string") {
+        return `String: ${value}`
+    } else if (typeof value == "number") {
+        return `Number: ${value}`
+    } else {
+        return "Null value"
+    }
+}
+
+// ============================================
+// CLOSURES & CURRYING
+// ============================================
+
+fn makeMultiplier(factor: int) -> (int) -> int {
+    return x -> x * factor
+}
+
+let double = makeMultiplier(2)
+let triple = makeMultiplier(3)
+
+print(double(5))  // 10
+print(triple(5))  // 15
+
+// Currying manually
+fn add(a: int) -> (int) -> int {
+    return b -> a + b
+}
+
+let add5 = add(5)
+print(add5(10))  // 15
+
+// ============================================
+// MODULE SYSTEM
+// ============================================
+
+// Export
+export let API_KEY = "secret"
+export fn helper() -> void {
+    print("Helping!")
+}
+
+export class MyClass {
+    doSomething() -> void {
+        print("Doing something")
+    }
+}
+
+// Default export
+export default fn main() -> int {
+    print("Main function")
+    return 0
+}
+
+// Import (in another file)
+// import {API_KEY, helper} from "./utils"
+// import MyClass from "./class"
+// import * as utils from "./utils"
+
+// ============================================
+// EXAMPLE: COMPLETE APP WITH ALL FEATURES
+// ============================================
+
+class TodoItem {
+    id: int
+    text: string
+    completed: bool
+    
+    constructor(id: int, text: string) {
+        this.id = id
+        this.text = text
+        this.completed = false
+    }
+    
+    toggle() -> void {
+        this.completed = !this.completed
+    }
+    
+    get display() -> string {
+        let status = this.completed ? "✓" : " "
+        return `[${status}] ${this.text}`
+    }
+}
+
+class TodoList {
+    items: TodoItem[]
+    nextId: int
+    
+    constructor() {
+        this.items = []
+        this.nextId = 1
+    }
+    
+    add(text: string) -> void {
+        let item = new TodoItem(this.nextId++, text)
+        this.items = [...this.items, item]
+    }
+    
+    remove(id: int) -> void {
+        this.items = this.items.filter(item -> item.id != id)
+    }
+    
+    toggle(id: int) -> void {
+        let item = this.items.find(item -> item.id == id)
+        item?.toggle()
+    }
+    
+    get completed() -> TodoItem[] {
+        return this.items.filter(item -> item.completed)
+    }
+    
+    get pending() -> TodoItem[] {
+        return this.items.filter(item -> !item.completed)
+    }
+    
+    display() -> void {
+        print("=== TODO LIST ===")
+        this.items.forEach(item -> print(item.display))
+        print(`\nTotal: ${this.items.length}, ` +
+              `Completed: ${this.completed.length}, ` +
+              `Pending: ${this.pending.length}`)
+    }
+}
+
+fn main() -> int {
+    let todos = new TodoList()
+    
+    todos.add("Learn LPP")
+    todos.add("Build project")
+    todos.add("Deploy app")
+    
+    todos.toggle(1)
+    todos.display()
+    
+    return 0
+}

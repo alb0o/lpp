@@ -1,0 +1,25 @@
+// Test Guards in Functions
+fn factorial(n: int) -> int {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+fn classify(x: int) -> string {
+    if (x < 0) {
+        return "negative";
+    }
+    if (x == 0) {
+        return "zero";
+    }
+    return "positive";
+}
+
+fn main() -> int {
+    print(factorial(5));
+    print(classify(-5));
+    print(classify(0));
+    print(classify(10));
+    return 0;
+}

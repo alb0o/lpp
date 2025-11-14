@@ -1,0 +1,247 @@
+// LPP - Advanced Symbolic Syntax Examples
+
+// ============================================
+// 1. SYMBOLIC TERNARY IF (?->$)
+// ============================================
+
+// Mode A: JS-like
+fn checkSign(x: int) -> string {
+    if (x > 0) {
+        return "positive"
+    } else {
+        return "negative"
+    }
+}
+
+// Mode B: Symbolic
+fn checkSignSymbolic(x: int) -> string {
+    return ?x > 0 -> "positive" $ "negative"
+}
+
+// If unario (solo then)
+fn printIfPositive(x: int) -> void {
+    ?x > 0 -> print("It's positive!")
+}
+
+// Nesting
+fn classify(x: int) -> string {
+    return ?x > 10 -> "big" $ ?x > 5 -> "medium" $ "small"
+}
+
+// ============================================
+// 2. LAMBDA FUNCTIONS
+// ============================================
+
+// Lambda semplice
+let double = x -> x * 2
+let add = (a, b) -> a + b
+
+// Lambda con tipi
+let multiply: (int, int) -> int = (a, b) -> a * b
+
+// Lambda con body
+let process = (data: string) -> {
+    let result = transform(data)
+    return result
+}
+
+// Higher-order functions
+fn map(arr: int[], fn: (int) -> int) -> int[] {
+    let result: int[] = []
+    for (let i = 0; i < arr.length; i++) {
+        result.push(fn(arr[i]))
+    }
+    return result
+}
+
+let numbers = [1, 2, 3, 4, 5]
+let doubled = map(numbers, x -> x * 2)
+
+// ============================================
+// 3. PIPELINE OPERATOR (|>)
+// ============================================
+
+// F#/Elixir style - legge come un flusso
+fn processData(data: int[]) -> int {
+    return data
+        |> filter(x -> x > 0)
+        |> map(x -> x * 2)
+        |> reduce((a, b) -> a + b, 0)
+}
+
+// One-liner elegante
+let result = getValue() |> validate |> transform |> save
+
+// Vs nesting tradizionale (meno leggibile)
+let resultNested = save(transform(validate(getValue())))
+
+// ============================================
+// 4. COMPOSIZIONE FUNZIONALE (.)
+// ============================================
+
+// Haskell-style composition
+let absoluteValue = x -> ?x < 0 -> -x $ x
+let square = x -> x * x
+let negate = x -> -x
+
+// Composizione: f . g . h = x -> f(g(h(x)))
+let pipeline = negate . square . absoluteValue
+
+// Uso
+print(pipeline(-5))  // -(25) = -25
+
+// Composizione con funzioni esistenti
+let normalize = divide(100) . round . multiply(100)
+
+// ============================================
+// 5. LIST COMPREHENSION
+// ============================================
+
+// Numeri pari da 0 a 20
+let evens = [x | x in 0..20, x % 2 == 0]
+
+// Quadrati dei numeri dispari
+let oddSquares = [x * x | x in 1..10, x % 2 != 0]
+
+// Prodotto cartesiano
+let pairs = [[x, y] | x in 1..3, y in 1..3]
+
+// Con predicati multipli
+let filtered = [x | x in numbers, x > 10, x < 100, x % 3 == 0]
+
+// Nested comprehension (matematica pura)
+let matrix = [[i + j | j in 0..5] | i in 0..5]
+
+// ============================================
+// 6. RANGE OPERATOR (..)
+// ============================================
+
+// Range semplice
+for (let i in 0..10) {
+    print(i)  // 0, 1, 2, ..., 10
+}
+
+// Range con step (syntax: start..end..step)
+for (let i in 0..100..5) {
+    print(i)  // 0, 5, 10, ..., 100
+}
+
+// Compact arrow-style for
+for i in 0..10 -> print(i)
+
+// ============================================
+// 7. FUNZIONI MATEMATICHE PURE
+// ============================================
+
+// Definizione matematica (no fn, no return)
+factorial(n: int): int = ?n <= 1 -> 1 $ n * factorial(n - 1)
+
+power(base: int, exp: int): int = 
+    ?exp == 0 -> 1 $ base * power(base, exp - 1)
+
+fibonacci(n: int): int = 
+    ?n <= 1 -> n $ fibonacci(n - 1) + fibonacci(n - 2)
+
+// Con composizione
+abs(x: int): int = ?x < 0 -> -x $ x
+square(x: int): int = x * x
+transform(x: int): int = (negate . square . abs)(x)
+
+// ============================================
+// 8. ESEMPIO COMPLETO: PIPELINE DI DATI
+// ============================================
+
+fn main() -> int {
+    // Dataset
+    let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    
+    // Mode A: JS-like (chained methods)
+    let resultA = numbers
+        .filter(x -> x % 2 == 0)
+        .map(x -> x * 2)
+        .reduce((a, b) -> a + b, 0)
+    
+    // Mode B: Pipeline operator
+    let resultB = numbers
+        |> filter(x -> x % 2 == 0)
+        |> map(x -> x * 2)
+        |> reduce((a, b) -> a + b, 0)
+    
+    // Mode C: Composition
+    let processEvensPipe = 
+        reduce((a, b) -> a + b, 0) .
+        map(x -> x * 2) .
+        filter(x -> x % 2 == 0)
+    
+    let resultC = processEvensPipe(numbers)
+    
+    print(resultA)
+    print(resultB)
+    print(resultC)
+    
+    return 0
+}
+
+// ============================================
+// 9. ESEMPIO: FizzBuzz SIMBOLICO
+// ============================================
+
+fn fizzBuzz(n: int) -> string {
+    return ?n % 15 == 0 -> "FizzBuzz" $
+           ?n % 3 == 0 -> "Fizz" $
+           ?n % 5 == 0 -> "Buzz" $
+           n.toString()
+}
+
+// Versione con list comprehension
+let fizzBuzzList = [fizzBuzz(x) | x in 1..100]
+
+// ============================================
+// 10. ESEMPIO: QUICKSORT FUNZIONALE
+// ============================================
+
+fn quicksort(arr: int[]) -> int[] {
+    ?arr.length <= 1 -> arr $ {
+        let pivot = arr[0]
+        let rest = arr.slice(1)
+        
+        let less = [x | x in rest, x < pivot]
+        let greater = [x | x in rest, x >= pivot]
+        
+        return [...quicksort(less), pivot, ...quicksort(greater)]
+    }
+}
+
+// Versione con pipeline
+fn quicksortPipe(arr: int[]) -> int[] {
+    return ?arr.length <= 1 -> arr $ 
+        arr |> getPivot |> partition |> recurse |> concat
+}
+
+// ============================================
+// 11. SINTASSI DUALE SIDE-BY-SIDE
+// ============================================
+
+// Stesso algoritmo, due stili
+
+// Mode A: Familiar JS-like
+fn sumSquaresEvenJS(numbers: int[]) -> int {
+    let result = 0
+    for (let n of numbers) {
+        if (n % 2 == 0) {
+            result = result + (n * n)
+        }
+    }
+    return result
+}
+
+// Mode B: Functional/Symbolic
+sumSquaresEvenFP(numbers: int[]): int =
+    numbers
+    |> filter(x -> x % 2 == 0)
+    |> map(x -> x * x)
+    |> reduce((a, b) -> a + b, 0)
+
+// Mode C: List comprehension
+sumSquaresEvenLC(numbers: int[]): int =
+    reduce((a, b) -> a + b, 0, [x * x | x in numbers, x % 2 == 0])

@@ -1,0 +1,21 @@
+// LPP Test - Lambda and Ternary If
+// Simple test for new syntax features
+
+fn main() -> int {
+    // Test 1: Ternary if simbolico
+    let x: int = 10
+    let msg: string = ?x > 5 -> "big" $ "small"
+    print(msg)
+    
+    // Test 2: Simple lambda (as value)
+    // let double = x -> x * 2
+    // print(double(5))
+    
+    // Test 3: Array literal
+    // let numbers: int[] = [1, 2, 3, 4, 5]
+    
+    // Test 4: Range
+    // for i in 0..10 -> print(i)
+    
+    return 0
+}

@@ -1,0 +1,26 @@
+// Test OOP - Classes with Inheritance
+class Animal {
+    name: string;
+    age: int;
+    
+    fn speak() -> void {
+        print("Animal makes a sound");
+    }
+}
+
+class Dog extends Animal {
+    breed: string;
+    
+    fn speak() -> void {
+        print("Woof! Woof!");
+    }
+    
+    fn wagTail() -> void {
+        print("Dog is wagging tail");
+    }
+}
+
+fn main() -> int {
+    print("Testing classes with inheritance");
+    return 0;
+}

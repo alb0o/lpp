@@ -1,0 +1,86 @@
+{
+    "name": "lpp-language",
+    "displayName": "LPP Language Support",
+    "description": "Language support for LPP with syntax highlighting, error detection, and build integration",
+    "version": "0.1.0",
+    "publisher": "lpp",
+    "engines": {
+        "vscode": "^1.80.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "lpp",
+                "aliases": [
+                    "LPP",
+                    "lpp"
+                ],
+                "extensions": [
+                    ".lpp"
+                ],
+                "configuration": "./language-configuration.json",
+                "icon": {
+                    "light": "./icons/lpp-icon.png",
+                    "dark": "./icons/lpp-icon.png"
+                }
+            }
+        ],
+        "grammars": [
+            {
+                "language": "lpp",
+                "scopeName": "source.lpp",
+                "path": "./syntaxes/lpp.tmLanguage.json"
+            }
+        ],
+        "problemMatchers": [
+            {
+                "name": "lpp",
+                "owner": "lpp",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.+?):(\\d+):(\\d+):\\s+(error|warning|note):\\s+\\[([A-Z-]+)\\]\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "code": 5,
+                    "message": 6
+                }
+            }
+        ],
+        "taskDefinitions": [
+            {
+                "type": "lpp",
+                "required": [
+                    "file"
+                ],
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "description": "The LPP file to compile"
+                    }
+                }
+            }
+        ],
+        "snippets": [
+            {
+                "language": "lpp",
+                "path": "./snippets/lpp.json"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "echo 'No build needed'",
+        "package": "vsce package"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.80.0",
+        "vsce": "^2.15.0"
+    }
+}

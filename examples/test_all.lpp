@@ -1,0 +1,22 @@
+// Test completo: ternary if + lambda + pipeline
+fn doubleValue(x: int) -> int {
+    return x * 2;
+}
+
+fn main() -> int {
+    let x = 10;
+    
+    // Ternary if
+    let msg = ?x > 5 -> "big" $ "small";
+    print(msg);
+    
+    // Lambda
+    let square = y -> y * y;
+    print(square(4));
+    
+    // Pipeline
+    let result = x |> doubleValue;
+    print(result);
+    
+    return 0;
+}

@@ -1,0 +1,13 @@
+// Test Spread Operator
+fn main() -> int {
+    let arr1 = [1, 2, 3];
+    let arr2 = [4, 5, 6];
+    
+    // Spread in array
+    let combined = [...arr1, ...arr2];
+    
+    print("Combined array:");
+    // print(combined);  // Non possiamo ancora stampare array
+    
+    return 0;
+}

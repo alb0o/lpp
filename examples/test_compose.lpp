@@ -1,0 +1,37 @@
+// Test Function Composition
+fn double(x: int) -> int {
+    return x * 2;
+}
+
+fn triple(x: int) -> int {
+    return x * 3;
+}
+
+fn addTen(x: int) -> int {
+    return x + 10;
+}
+
+fn main() -> int {
+    // Composizione Haskell-style: f . g . h = x -> f(g(h(x)))
+    // La composizione si applica da DESTRA a SINISTRA
+    
+    // Test 1: double . triple
+    // Significa: prima triple, poi double
+    // triple(5) = 15, poi double(15) = 30
+    let doubleAfterTriple = double . triple;
+    let result1 = doubleAfterTriple(5);
+    
+    print("Double after triple of 5:");
+    print(result1);  // Dovrebbe essere 30
+    
+    // Test 2: composizione completa
+    // addTen . triple . double
+    // Applica: double(5)=10, triple(10)=30, addTen(30)=40
+    let composed = addTen . triple . double;
+    let result2 = composed(5);
+    
+    print("Full composition result:");
+    print(result2);  // Dovrebbe essere 40
+    
+    return 0;
+}

@@ -1,0 +1,152 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "LPP",
+    "scopeName": "source.lpp",
+    "patterns": [
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#functions"
+        },
+        {
+            "include": "#types"
+        },
+        {
+            "include": "#operators"
+        },
+        {
+            "include": "#punctuation"
+        }
+    ],
+    "repository": {
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.double-slash.lpp",
+                    "match": "//.*$"
+                },
+                {
+                    "name": "comment.block.lpp",
+                    "begin": "/\\*",
+                    "end": "\\*/"
+                }
+            ]
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.lpp",
+                    "match": "\\b(if|else|while|for|return|break|continue|match|loop)\\b"
+                },
+                {
+                    "name": "keyword.declaration.lpp",
+                    "match": "\\b(fn|let|mut|const|struct|enum|trait|impl|type|use|mod|pub)\\b"
+                },
+                {
+                    "name": "keyword.other.lpp",
+                    "match": "\\b(self|super|as|in|ref|move)\\b"
+                },
+                {
+                    "name": "storage.modifier.lpp",
+                    "match": "\\b(static|async|await|unsafe)\\b"
+                }
+            ]
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "name": "string.quoted.double.lpp",
+                    "begin": "\"",
+                    "end": "\"",
+                    "patterns": [
+                        {
+                            "name": "constant.character.escape.lpp",
+                            "match": "\\\\."
+                        }
+                    ]
+                },
+                {
+                    "name": "string.quoted.single.lpp",
+                    "begin": "'",
+                    "end": "'",
+                    "patterns": [
+                        {
+                            "name": "constant.character.escape.lpp",
+                            "match": "\\\\."
+                        }
+                    ]
+                }
+            ]
+        },
+        "numbers": {
+            "patterns": [
+                {
+                    "name": "constant.numeric.lpp",
+                    "match": "\\b\\d+(\\.\\d+)?([eE][+-]?\\d+)?\\b"
+                },
+                {
+                    "name": "constant.numeric.hex.lpp",
+                    "match": "\\b0[xX][0-9a-fA-F]+\\b"
+                },
+                {
+                    "name": "constant.numeric.binary.lpp",
+                    "match": "\\b0[bB][01]+\\b"
+                }
+            ]
+        },
+        "functions": {
+            "patterns": [
+                {
+                    "name": "entity.name.function.lpp",
+                    "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()"
+                }
+            ]
+        },
+        "types": {
+            "patterns": [
+                {
+                    "name": "storage.type.lpp",
+                    "match": "\\b(int|float|bool|string|void|char|i8|i16|i32|i64|u8|u16|u32|u64|f32|f64)\\b"
+                },
+                {
+                    "name": "entity.name.type.lpp",
+                    "match": "\\b[A-Z][a-zA-Z0-9_]*\\b"
+                }
+            ]
+        },
+        "operators": {
+            "patterns": [
+                {
+                    "name": "keyword.operator.lpp",
+                    "match": "(\\+|\\-|\\*|\\/|%|==|!=|<|>|<=|>=|&&|\\|\\||!|&|\\||\\^|<<|>>|=|\\+=|\\-=|\\*=|\\/=|%=)"
+                },
+                {
+                    "name": "keyword.operator.arrow.lpp",
+                    "match": "(->|=>|\\|>)"
+                }
+            ]
+        },
+        "punctuation": {
+            "patterns": [
+                {
+                    "name": "punctuation.separator.lpp",
+                    "match": "[,;:]"
+                },
+                {
+                    "name": "punctuation.brackets.lpp",
+                    "match": "[\\(\\)\\[\\]\\{\\}]"
+                }
+            ]
+        }
+    }
+}

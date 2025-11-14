@@ -1,0 +1,22 @@
+// Test Interfaces
+interface Drawable {
+    draw() -> void;
+    getArea() -> float;
+}
+
+class Circle {
+    radius: float;
+    
+    fn draw() -> void {
+        print("Drawing a circle");
+    }
+    
+    fn getArea() -> float {
+        return 3.14 * radius * radius;
+    }
+}
+
+fn main() -> int {
+    print("Testing interfaces");
+    return 0;
+}

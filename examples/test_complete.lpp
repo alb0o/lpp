@@ -1,0 +1,76 @@
+// LPP Complete Feature Test
+// Tests: OOP, Pattern Matching, Higher-Order Functions, ADTs
+
+// === ADT (Algebraic Data Type) ===
+type Result = Success(int) | Failure(string);
+
+// === Interface ===
+interface Shape {
+    area() -> float;
+    perimeter() -> float;
+}
+
+// === Class with Inheritance ===
+class Rectangle {
+    width: float;
+    height: float;
+    
+    fn area() -> float {
+        return width * height;
+    }
+    
+    fn perimeter() -> float {
+        return 2 * (width + height);
+    }
+}
+
+class Square extends Rectangle {
+    side: float;
+    
+    fn area() -> float {
+        return side * side;
+    }
+}
+
+// === Pattern Matching ===
+fn describe(n: int) -> string {
+    return match n {
+        case 0 -> "zero"
+        case 1 -> "one"
+        case 2 -> "two"
+    };
+}
+
+// === Higher-Order Functions ===
+fn square(x: int) -> int {
+    return x * x;
+}
+
+fn isPositive(x: int) -> bool {
+    return x > 0;
+}
+
+fn multiply(a: int, b: int) -> int {
+    return a * b;
+}
+
+// === Main ===
+fn main() -> int {
+    print("=== LPP Feature Demo ===");
+    
+    // Pattern matching
+    print("Pattern matching:");
+    print(describe(1));
+    
+    // Higher-order functions
+    print("Higher-order functions:");
+    let nums = [1, 2, 3, 4, 5];
+    let squared = map(nums, square);
+    let positives = filter(nums, isPositive);
+    let product = reduce(nums, 1, multiply);
+    print("Product:");
+    print(product);
+    
+    print("All tests completed!");
+    return 0;
+}

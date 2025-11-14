@@ -1,0 +1,8 @@
+// Test: Division by zero detection
+fn main() -> int {
+    let x = 10;
+    let y = 0;
+    let result = x / y;  // Should trigger division by zero warning
+    println(result);
+    return 0;
+}

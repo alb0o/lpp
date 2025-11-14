@@ -1,0 +1,9 @@
+// Test borrow checker - Use after move
+
+fn main() -> int {
+    let x = 42;
+    let y = x;  // Move x to y
+    let z = x;  // ERROR: use after move!
+    
+    return 0;
+}

@@ -1,0 +1,10 @@
+// Test borrow checker - Valid code
+
+fn main() -> int {
+    let mut x = 42;  // Mutable variable
+    x = 100;         // OK: x is mutable
+    
+    let y = x;       // OK: use x
+    
+    return y;
+}

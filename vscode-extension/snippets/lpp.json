@@ -1,0 +1,84 @@
+{
+    "Function": {
+        "prefix": "fn",
+        "body": [
+            "fn ${1:name}(${2:params}) -> ${3:int} {",
+            "\t$0",
+            "\treturn 0;",
+            "}"
+        ],
+        "description": "Define a function"
+    },
+    "Let binding": {
+        "prefix": "let",
+        "body": "let ${1:name} = ${2:value};$0",
+        "description": "Immutable variable binding"
+    },
+    "Mutable binding": {
+        "prefix": "letm",
+        "body": "let mut ${1:name} = ${2:value};$0",
+        "description": "Mutable variable binding"
+    },
+    "If statement": {
+        "prefix": "if",
+        "body": [
+            "if ${1:condition} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "If statement"
+    },
+    "If-else statement": {
+        "prefix": "ife",
+        "body": [
+            "if ${1:condition} {",
+            "\t$2",
+            "} else {",
+            "\t$0",
+            "}"
+        ],
+        "description": "If-else statement"
+    },
+    "While loop": {
+        "prefix": "while",
+        "body": [
+            "while ${1:condition} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "While loop"
+    },
+    "For loop": {
+        "prefix": "for",
+        "body": [
+            "for ${1:item} in ${2:iterator} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "For loop"
+    },
+    "Struct": {
+        "prefix": "struct",
+        "body": [
+            "struct ${1:Name} {",
+            "\t${2:field}: ${3:type},$0",
+            "}"
+        ],
+        "description": "Define a struct"
+    },
+    "Println": {
+        "prefix": "println",
+        "body": "println(${1:value});$0",
+        "description": "Print with newline"
+    },
+    "Main function": {
+        "prefix": "main",
+        "body": [
+            "fn main() -> int {",
+            "\t$0",
+            "\treturn 0;",
+            "}"
+        ],
+        "description": "Main function"
+    }
+}

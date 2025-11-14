@@ -1,0 +1,14 @@
+// Test Pattern Matching
+fn checkValue(x: int) -> string {
+    return match x {
+        case 0 -> "zero"
+        case 1 -> "one"
+        case 2 -> "two"
+    };
+}
+
+fn main() -> int {
+    let result = checkValue(1);
+    print(result);
+    return 0;
+}

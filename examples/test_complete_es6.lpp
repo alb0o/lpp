@@ -1,0 +1,51 @@
+// LPP - Complete Feature Showcase
+// All ES6+ and special features
+
+// 1. Functions with rest parameters
+fn sum(first: int, ...numbers) -> int {
+    return first;
+}
+
+// 2. Higher-order functions and lambdas
+fn main() -> int {
+    // Arrow functions / Lambdas
+    let double = x -> x * 2;
+    let add = (a, b) -> a + b;
+    
+    // Let bindings
+    let x = 42;
+    let y = 10;
+    
+    // Nullish coalescing
+    let value = y ?? 100;
+    
+    // Array literals
+    let numbers = [1, 2, 3, 4, 5];
+    
+    // Spread operator
+    let arr1 = [1, 2, 3];
+    let arr2 = [4, 5, 6];
+    let combined = [...arr1, ...arr2];
+    
+    // Pipeline operator
+    let result = x |> double |> double;
+    
+    // Function composition
+    let triple = x -> x * 3;
+    let composed = double . triple;
+    
+    // Match expression (pattern matching)
+    let grade = match x {
+        case 90 -> "A"
+        case 80 -> "B"
+        case 70 -> "C"
+    };
+    
+    // Ternary if
+    let status = ?x > 50 -> "high" $ "low";
+    
+    // Range
+    let range = 1..10;
+    
+    return 0;
+}

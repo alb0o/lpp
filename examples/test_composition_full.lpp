@@ -1,0 +1,28 @@
+// Test completo della composizione
+fn add5(x: int) -> int {
+    return x + 5;
+}
+
+fn mul2(x: int) -> int {
+    return x * 2;
+}
+
+fn sub3(x: int) -> int {
+    return x - 3;
+}
+
+fn main() -> int {
+    // Test 1: composizione semplice
+    let f1 = mul2 . add5;
+    let r1 = f1(10);  // mul2(add5(10)) = mul2(15) = 30
+    print("mul2 . add5 applied to 10:");
+    print(r1);  // Dovrebbe essere 30
+    
+    // Test 2: composizione tripla
+    let f2 = sub3 . mul2 . add5;
+    let r2 = f2(10);  // sub3(mul2(add5(10))) = sub3(mul2(15)) = sub3(30) = 27
+    print("sub3 . mul2 . add5 applied to 10:");
+    print(r2);  // Dovrebbe essere 27
+    
+    return 0;
+}

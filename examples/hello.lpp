@@ -1,0 +1,5 @@
+// Hello World example in LPP
+fn main() -> int {
+    print("Hello, World!");
+    return 0;
+}

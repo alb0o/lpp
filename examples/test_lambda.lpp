@@ -1,0 +1,8 @@
+// Test lambda expression
+fn main() -> int {
+    // Lambda semplice
+    let double = x -> x * 2;
+    let result: int = double(5);
+    print(result);
+    return 0;
+}

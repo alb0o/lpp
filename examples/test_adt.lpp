@@ -1,0 +1,9 @@
+// Test Algebraic Data Types
+type Option = Some(int) | None();
+
+type Result = Ok(string) | Error(string);
+
+fn main() -> int {
+    print("Testing ADTs");
+    return 0;
+}

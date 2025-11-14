@@ -1,0 +1,8 @@
+// Test borrow checker - Immutable assignment
+
+fn main() -> int {
+    let x = 42;     // Immutable by default
+    x = 100;        // ERROR: cannot assign to immutable variable
+    
+    return 0;
+}

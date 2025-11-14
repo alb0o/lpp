@@ -1,0 +1,7 @@
+// Test: Uninitialized variable read detection
+fn main() -> int {
+    let x;
+    let y = x + 10;  // Should trigger uninitialized read error
+    println(y);
+    return 0;
+}

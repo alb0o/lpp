@@ -1,0 +1,11 @@
+// Test rest parameters
+
+fn sum(a: int, ...numbers) -> int {
+    let total = a;
+    return total;
+}
+
+fn main() -> int {
+    let result = sum(1, 2, 3, 4, 5);
+    return 0;
+}

@@ -1,0 +1,11 @@
+// Test nullish coalescing and optional chaining
+
+fn main() -> int {
+    let x = 5;
+    let y = 0;
+    
+    // Nullish coalescing
+    let result = y ?? 10;
+    
+    return 0;
+}

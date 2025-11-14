@@ -1,0 +1,14 @@
+// Factorial calculation in LPP
+fn factorial(n: int) -> int {
+    if (n <= 1) {
+        return 1;
+    } else {
+        return n * factorial(n - 1);
+    }
+}
+
+fn main() -> int {
+    let result: int = factorial(5);
+    print(result);
+    return 0;
+}

@@ -1,0 +1,7 @@
+// Test list comprehension
+fn main() -> int {
+    // List comprehension con range e predicate
+    let evens = [x * 2 | x in 0..5, x > 1];
+    print(evens);
+    return 0;
+}
