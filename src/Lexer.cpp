@@ -154,6 +154,9 @@ namespace lpp
             case '~':
                 tokens.push_back(makeToken(TokenType::TILDE, "~"));
                 break;
+            case '\\':
+                tokens.push_back(makeToken(TokenType::BACKSLASH, "\\"));
+                break;
             case '^':
                 tokens.push_back(makeToken(TokenType::CARET, "^"));
                 break;

@@ -1,0 +1,24 @@
+// Test all symbolic operators
+
+fn main() -> int {
+    // Range operator ~
+    let r1 = 0~5;
+    let r2 = 1~10~2;
+    
+    // Map operator @
+    let nums = [1,2,3,4,5];
+    let doubled = nums @ (x -> x * 2);
+    
+    // Filter operator ?
+    // (Note: requires lookahead to distinguish from ternary)
+    // For now, test with function reference
+    
+    // Reduce operator \
+    let sum = nums \ ((acc, x) -> acc + x);
+    
+    print(r1);
+    print(doubled);
+    print(sum);
+    
+    return 0;
+}

@@ -1,0 +1,18 @@
+// Simple test of symbolic operators
+
+fn test_range() -> void {
+    let r = 0~5;
+    print(r);
+}
+
+fn test_map() -> void {
+    let nums = [1,2,3];
+    let doubled = nums @ (x -> x * 2);
+    print(doubled);
+}
+
+fn main() -> int {
+    test_range();
+    test_map();
+    return 0;
+}

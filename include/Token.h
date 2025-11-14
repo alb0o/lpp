@@ -113,6 +113,7 @@ namespace lpp
         PIPE,                    // |
         CARET,                   // ^
         TILDE,                   // ~
+        BACKSLASH,               // \ (reduce/fold operator)
         LESS_LESS,               // <<
         GREATER_GREATER,         // >>
         GREATER_GREATER_GREATER, // >>>

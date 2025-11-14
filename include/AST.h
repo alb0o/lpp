@@ -92,6 +92,56 @@ namespace lpp
         void accept(ASTVisitor &visitor) override;
     };
 
+    // Range expression: 0~5
+    class RangeExpr : public Expression
+    {
+    public:
+        std::unique_ptr<Expression> start;
+        std::unique_ptr<Expression> end;
+        std::unique_ptr<Expression> step; // optional, can be nullptr
+
+        RangeExpr(std::unique_ptr<Expression> s, std::unique_ptr<Expression> e, std::unique_ptr<Expression> st = nullptr)
+            : start(std::move(s)), end(std::move(e)), step(std::move(st)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Map/forEach operator: arr @ fn
+    class MapExpr : public Expression
+    {
+    public:
+        std::unique_ptr<Expression> iterable;
+        std::unique_ptr<Expression> fn;
+
+        MapExpr(std::unique_ptr<Expression> iter, std::unique_ptr<Expression> f)
+            : iterable(std::move(iter)), fn(std::move(f)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Filter operator: arr ? |x| condition
+    class FilterExpr : public Expression
+    {
+    public:
+        std::unique_ptr<Expression> iterable;
+        std::unique_ptr<Expression> predicate;
+
+        FilterExpr(std::unique_ptr<Expression> iter, std::unique_ptr<Expression> pred)
+            : iterable(std::move(iter)), predicate(std::move(pred)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Reduce/fold operator: arr \ |acc, x| expr
+    class ReduceExpr : public Expression
+    {
+    public:
+        std::unique_ptr<Expression> iterable;
+        std::unique_ptr<Expression> fn;
+        std::unique_ptr<Expression> initial; // optional
+
+        ReduceExpr(std::unique_ptr<Expression> iter, std::unique_ptr<Expression> f, std::unique_ptr<Expression> init = nullptr)
+            : iterable(std::move(iter)), fn(std::move(f)), initial(std::move(init)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
     class CallExpr : public Expression
     {
     public:
@@ -158,19 +208,6 @@ namespace lpp
 
         explicit CompositionExpr(std::vector<std::unique_ptr<Expression>> funcs)
             : functions(std::move(funcs)) {}
-        void accept(ASTVisitor &visitor) override;
-    };
-
-    // Range: start..end or start..end..step
-    class RangeExpr : public Expression
-    {
-    public:
-        std::unique_ptr<Expression> start;
-        std::unique_ptr<Expression> end;
-        std::unique_ptr<Expression> step; // nullable
-
-        RangeExpr(std::unique_ptr<Expression> s, std::unique_ptr<Expression> e, std::unique_ptr<Expression> st = nullptr)
-            : start(std::move(s)), end(std::move(e)), step(std::move(st)) {}
         void accept(ASTVisitor &visitor) override;
     };
 
@@ -427,6 +464,9 @@ namespace lpp
         virtual void visit(PipelineExpr &node) = 0;
         virtual void visit(CompositionExpr &node) = 0;
         virtual void visit(RangeExpr &node) = 0;
+        virtual void visit(MapExpr &node) = 0;
+        virtual void visit(FilterExpr &node) = 0;
+        virtual void visit(ReduceExpr &node) = 0;
         virtual void visit(ArrayExpr &node) = 0;
         virtual void visit(ListComprehension &node) = 0;
         virtual void visit(SpreadExpr &node) = 0;

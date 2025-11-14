@@ -417,6 +417,28 @@ namespace lpp
         }
     }
 
+    void StaticAnalyzer::visit(MapExpr &node)
+    {
+        node.iterable->accept(*this);
+        node.fn->accept(*this);
+    }
+
+    void StaticAnalyzer::visit(FilterExpr &node)
+    {
+        node.iterable->accept(*this);
+        node.predicate->accept(*this);
+    }
+
+    void StaticAnalyzer::visit(ReduceExpr &node)
+    {
+        node.iterable->accept(*this);
+        node.fn->accept(*this);
+        if (node.initial)
+        {
+            node.initial->accept(*this);
+        }
+    }
+
     void StaticAnalyzer::visit(ArrayExpr &node)
     {
         for (auto &elem : node.elements)

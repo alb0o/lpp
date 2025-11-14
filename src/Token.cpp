@@ -108,6 +108,7 @@ namespace lpp
         {TokenType::PIPE, "PIPE"},
         {TokenType::CARET, "CARET"},
         {TokenType::TILDE, "TILDE"},
+        {TokenType::BACKSLASH, "BACKSLASH"},
         {TokenType::LESS_LESS, "LESS_LESS"},
         {TokenType::GREATER_GREATER, "GREATER_GREATER"},
         {TokenType::GREATER_GREATER_GREATER, "GREATER_GREATER_GREATER"},

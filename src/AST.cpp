@@ -17,6 +17,9 @@ namespace lpp
     void PipelineExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void CompositionExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void RangeExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void MapExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void FilterExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void ReduceExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void ArrayExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void ListComprehension::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void SpreadExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }

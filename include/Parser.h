@@ -20,6 +20,7 @@ namespace lpp
         size_t current = 0;
 
         Token peek() const;
+        Token peekNext() const;
         Token previous() const;
         Token advance();
         bool check(TokenType type) const;
@@ -50,6 +51,7 @@ namespace lpp
         std::unique_ptr<Expression> logicalAnd();
         std::unique_ptr<Expression> equality();
         std::unique_ptr<Expression> comparison();
+        std::unique_ptr<Expression> symbolicOps();
         std::unique_ptr<Expression> term();
         std::unique_ptr<Expression> factor();
         std::unique_ptr<Expression> unary();

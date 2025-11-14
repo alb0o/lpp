@@ -26,6 +26,9 @@ namespace lpp
         void visit(PipelineExpr &node) override;
         void visit(CompositionExpr &node) override;
         void visit(RangeExpr &node) override;
+        void visit(MapExpr &node) override;
+        void visit(FilterExpr &node) override;
+        void visit(ReduceExpr &node) override;
         void visit(ArrayExpr &node) override;
         void visit(ListComprehension &node) override;
         void visit(SpreadExpr &node) override;

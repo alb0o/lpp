@@ -47,6 +47,13 @@ namespace lpp
         return tokens[current];
     }
 
+    Token Parser::peekNext() const
+    {
+        if (current + 1 >= tokens.size())
+            return tokens[tokens.size() - 1];
+        return tokens[current + 1];
+    }
+
     Token Parser::previous() const
     {
         return tokens[current - 1];
@@ -465,14 +472,44 @@ namespace lpp
 
     std::unique_ptr<Expression> Parser::comparison()
     {
-        auto expr = term();
+        auto expr = symbolicOps();
 
         while (match(TokenType::LESS) || match(TokenType::LESS_EQUAL) ||
                match(TokenType::GREATER) || match(TokenType::GREATER_EQUAL))
         {
             std::string op = previous().lexeme;
-            auto right = term();
+            auto right = symbolicOps();
             expr = std::make_unique<BinaryExpr>(std::move(expr), op, std::move(right));
+        }
+
+        return expr;
+    }
+
+    std::unique_ptr<Expression> Parser::symbolicOps()
+    {
+        auto expr = term();
+
+        // Map operator: arr @ fn
+        if (match(TokenType::AT))
+        {
+            auto fn = term();
+            return std::make_unique<MapExpr>(std::move(expr), std::move(fn));
+        }
+
+        // Filter operator: arr ? |x| condition (but not ternary ?)
+        // We need to check if next is a lambda to distinguish from ternary
+        if (check(TokenType::QUESTION) && peekNext().type == TokenType::PIPE)
+        {
+            advance(); // consume ?
+            auto predicate = term();
+            return std::make_unique<FilterExpr>(std::move(expr), std::move(predicate));
+        }
+
+        // Reduce operator: arr \ |acc, x| expr
+        if (match(TokenType::BACKSLASH))
+        {
+            auto fn = term();
+            return std::make_unique<ReduceExpr>(std::move(expr), std::move(fn));
         }
 
         return expr;
@@ -482,13 +519,13 @@ namespace lpp
     {
         auto expr = factor();
 
-        // Check for range operator: start..end or start..end..step
-        if (match(TokenType::DOT_DOT))
+        // Check for range operator: start..end or start..end..step or start~end or start~end~step
+        if (match(TokenType::DOT_DOT) || match(TokenType::TILDE))
         {
             auto end = factor();
             std::unique_ptr<Expression> step = nullptr;
 
-            if (match(TokenType::DOT_DOT))
+            if (match(TokenType::DOT_DOT) || match(TokenType::TILDE))
             {
                 step = factor();
             }

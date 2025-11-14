@@ -275,19 +275,70 @@ namespace lpp
 
     void Transpiler::visit(RangeExpr &node)
     {
-        // Range viene usato tipicamente in for loops o list comprehension
-        // Per ora generiamo una struct temporanea con begin/end
-        // Implementazione semplificata: generiamo direttamente i valori
-        output << "/* range: ";
+        // Generate IIFE that creates vector with range values
+        output << "([&]() { std::vector<int> __range; int __start = ";
         node.start->accept(*this);
-        output << "..";
+        output << "; int __end = ";
         node.end->accept(*this);
+        output << "; int __step = ";
         if (node.step)
         {
-            output << "..";
             node.step->accept(*this);
         }
-        output << " */";
+        else
+        {
+            output << "1";
+        }
+        output << "; if (__step > 0) { for (int i = __start; i <= __end; i += __step) __range.push_back(i); }";
+        output << " else { for (int i = __start; i >= __end; i += __step) __range.push_back(i); }";
+        output << " return __range; })()";
+    }
+
+    void Transpiler::visit(MapExpr &node)
+    {
+        // arr @ fn => IIFE with std::transform pattern
+        output << "([&]() { std::vector<decltype(";
+        node.fn->accept(*this);
+        output << "(std::declval<decltype(";
+        node.iterable->accept(*this);
+        output << ")::value_type>()))> __result; for (auto& __item : ";
+        node.iterable->accept(*this);
+        output << ") { __result.push_back((";
+        node.fn->accept(*this);
+        output << ")(__item)); } return __result; })()";
+    }
+
+    void Transpiler::visit(FilterExpr &node)
+    {
+        // arr ? |x| cond => IIFE with filter pattern
+        output << "([&]() { std::remove_reference_t<decltype(";
+        node.iterable->accept(*this);
+        output << ")> __result; for (auto& __item : ";
+        node.iterable->accept(*this);
+        output << ") { if ((";
+        node.predicate->accept(*this);
+        output << ")(__item)) { __result.push_back(__item); } } return __result; })()";
+    }
+
+    void Transpiler::visit(ReduceExpr &node)
+    {
+        // arr \ |acc,x| expr => IIFE with accumulate pattern
+        output << "([&]() { auto __acc = ";
+        if (node.initial)
+        {
+            node.initial->accept(*this);
+        }
+        else
+        {
+            output << "decltype(";
+            node.iterable->accept(*this);
+            output << ")::value_type{}";
+        }
+        output << "; for (auto& __item : ";
+        node.iterable->accept(*this);
+        output << ") { __acc = (";
+        node.fn->accept(*this);
+        output << ")(__acc, __item); } return __acc; })()";
     }
 
     void Transpiler::visit(ArrayExpr &node)

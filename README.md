@@ -15,12 +15,13 @@
 ### Language Features
 - 🎯 **Modern Syntax** — Rust/JS-inspired (arrow functions, destructuring, spread)
 - 📦 **ES6+ Support** — Optional chaining (`?.`), nullish coalescing (`??`), template literals
+- ⚡ **Golf-Style Operators** — Symbolic syntax for functional programming (`~`, `@`, `?`, `\`)
 - 🔧 **Pattern Matching** — `match` expressions with guards
 - 🧩 **ADTs** — Algebraic data types and type unions
 - 🎨 **Higher-Order Functions** — Map, filter, compose, pipeline operator
 - 🔗 **Interfaces & Traits** — Protocol-oriented programming
 - 📝 **List Comprehensions** — Python-style syntax
-- ⚡ **Lambda Expressions** — Closures with capture
+- 🌊 **Lambda Expressions** — Closures with capture
 
 ### Static Analysis
 - 🛡️ **Path-Sensitive Analysis** — CFG + data-flow tracking
@@ -126,14 +127,20 @@ let result = x > 0 ? "positive" : "negative";  // ternary
 ### Modern Features
 
 ```lpp
-let [a, b, ...rest] = array;    // destructuring
+// Golf-style operators (compact functional programming)
+let range = 0~10;                     // [0,1,2,...,10]
+let doubled = nums @ (x -> x * 2);    // map
+let evens = nums ? (x -> x % 2 == 0); // filter
+let sum = nums \ ((acc,x) -> acc+x);  // reduce
+
+// Destructuring & spread
+let [a, b, ...rest] = array;
 let {x, y} = point;
+let combined = [...a1, ...a2];
 
-let combined = [...a1, ...a2];  // spread
-let merged = {...o1, ...o2};
-
-let city = user?.address?.city;       // optional chaining
-let username = user?.name ?? "Anon";  // null coalescing
+// Optional chaining & nullish coalescing
+let city = user?.address?.city;
+let username = user?.name ?? "Anon";
 ```
 
 ## ���️ Static Analysis
@@ -185,10 +192,11 @@ Executable
 
 Details in [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## ��� Documentation
+## 📚 Documentation
 
 - **[Quick Start](docs/QUICKSTART.md)**
 - **[Language Specification](docs/FULL_SPEC.md)**
+- **[Golf-Style Operators](docs/GOLF_SYNTAX.md)** — Symbolic functional programming
 - **[Architecture Guide](docs/ARCHITECTURE.md)**
 - **[Static Analyzer Details](docs/STATIC_ANALYZER.md)**
 - **[ES6+ Features](docs/ES6_FEATURES.md)**
