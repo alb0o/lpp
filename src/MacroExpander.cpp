@@ -96,7 +96,7 @@ namespace lpp
     {
         // Add common built-in macros
         defineMacro("__LPP__", "1");
-        defineMacro("__VERSION__", "\"0.1.0\"");
+        defineMacro("__VERSION__", "\"0.8.13\"");
 
 // Platform macros
 #ifdef _WIN32

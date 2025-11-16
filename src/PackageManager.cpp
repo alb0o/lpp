@@ -103,7 +103,7 @@ namespace lpp
     {
         PackageManifest manifest;
         manifest.name = packageName;
-        manifest.version = "0.1.0";
+        manifest.version = "0.8.13";
         manifest.description = "A L++ project";
         manifest.author = "";
         manifest.license = "MIT";

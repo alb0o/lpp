@@ -1,10 +1,10 @@
 # Changelog - L++ Compiler
 
-## [0.1.0] - 2025-11-16
+## [0.8.13] - 2025-11-16
 
-### 🎉 Initial Release - 101 Features Complete
+### 🎉 Feature-Complete Release - Production Ready
 
-**Status:** ✅ Production Ready (100% feature complete)
+**Status:** ✅ 101 Features Complete | 13 Critical Bugs Fixed | Advanced CFG Implementation
 
 ---
 
