@@ -1,4 +1,4 @@
-# Advanced Features - L++ Language
+# Advanced Features - L++ Language v0.8.13
 
 Comprehensive guide to L++'s modern and experimental language features.
 
