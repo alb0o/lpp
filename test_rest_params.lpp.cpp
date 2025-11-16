@@ -138,24 +138,53 @@ T reduce(const std::vector<T>& vec, T init, F func) {
 
 template<typename... RestArgs>
 int sum(int first, RestArgs... rest) {
+    // Convert variadic pack to vector for iteration
+    auto __rest_vec_rest = std::vector{rest...};
+    #define rest __rest_vec_rest
     auto total = first;
     print("First: ");
     print(first);
     print("\n");
+    for (auto val : rest) {
+        print("Adding: ");
+        print(val);
+        print("\n");
+        total = (total + val);
+    }
     return total;
+    #undef rest
 }
 template<typename... RestArgs>
 std::string greet(std::string greeting, std::string name, RestArgs... titles) {
+    // Convert variadic pack to vector for iteration
+    auto __rest_vec_titles = std::vector{titles...};
+    #define titles __rest_vec_titles
     print(greeting);
     print(" ");
     print(name);
+    for (auto title : titles) {
+        print(", ");
+        print(title);
+    }
     print("\n");
     return greeting;
+    #undef titles
 }
 template<typename... RestArgs>
 int collect(RestArgs... items) {
-    print("Collected items\n");
-    return 0;
+    // Convert variadic pack to vector for iteration
+    auto __rest_vec_items = std::vector{items...};
+    #define items __rest_vec_items
+    print("Collected items: ");
+    auto count = 0;
+    for (auto item : items) {
+        print(item);
+        print(" ");
+        count = (count + 1);
+    }
+    print("\n");
+    return count;
+    #undef items
 }
 int main() {
     auto result1 = sum(10, 20, 30, 40);

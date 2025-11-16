@@ -1,11 +1,24 @@
 #include "Parser.h"
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 namespace lpp
 {
 
     Parser::Parser(const std::vector<Token> &tokens) : tokens(tokens) {}
+
+    Parser::Parser(const std::vector<Token> &tokens, const std::string &source)
+        : tokens(tokens), sourceCode(source)
+    {
+        // Split source into lines for error reporting
+        std::stringstream ss(sourceCode);
+        std::string line;
+        while (std::getline(ss, line))
+        {
+            sourceLines.push_back(line);
+        }
+    }
 
     std::unique_ptr<Program> Parser::parse()
     {
@@ -180,28 +193,114 @@ namespace lpp
     {
         if (check(type))
             return advance();
+
         error(message);
-        throw std::runtime_error(message);
+
+        // Don't throw - return a synthetic error token instead
+        Token errorToken;
+        errorToken.type = type;
+        errorToken.lexeme = "<missing>";
+        errorToken.line = peek().line;
+        errorToken.column = peek().column;
+        return errorToken;
     }
 
     void Parser::synchronize()
     {
+        panicMode = false;
         advance();
+
         while (!isAtEnd())
         {
+            // Stop at statement boundaries
             if (previous().type == TokenType::SEMICOLON)
                 return;
-            if (peek().type == TokenType::FN)
+
+            // Stop at declaration keywords
+            switch (peek().type)
+            {
+            case TokenType::CLASS:
+            case TokenType::FN:
+            case TokenType::LET:
+            case TokenType::CONST:
+            case TokenType::IF:
+            case TokenType::WHILE:
+            case TokenType::FOR:
+            case TokenType::RETURN:
+            case TokenType::IMPORT:
+            case TokenType::EXPORT:
+            case TokenType::TYPE:
+            case TokenType::ENUM:
+            case TokenType::INTERFACE:
                 return;
+            default:
+                break;
+            }
+
             advance();
         }
     }
 
     void Parser::error(const std::string &message)
     {
+        if (panicMode)
+            return; // Don't report cascading errors
+        panicMode = true;
+
         Token token = peek();
-        std::cerr << "Parse error at line " << token.line << ", column " << token.column
-                  << ": " << message << std::endl;
+        std::stringstream errorMsg;
+
+        errorMsg << "Parse error at line " << token.line << ", column " << token.column << ":\n";
+        errorMsg << "  " << message << "\n";
+
+        // Show source code context if available
+        if (!sourceLines.empty() && token.line > 0 && token.line <= sourceLines.size())
+        {
+            int lineIdx = token.line - 1;
+            std::string line = sourceLines[lineIdx];
+
+            // Show the line with line number
+            errorMsg << "\n";
+            errorMsg << "  " << token.line << " | " << line << "\n";
+
+            // Show caret pointing to error position
+            errorMsg << "    | ";
+            for (int i = 0; i < token.column - 1; i++)
+            {
+                errorMsg << " ";
+            }
+            errorMsg << "^";
+
+            // Add wavy underline for multi-character tokens
+            int tokenLen = token.lexeme.length();
+            for (int i = 1; i < tokenLen && i < 20; i++)
+            {
+                errorMsg << "~";
+            }
+            errorMsg << "\n";
+
+            // Add helpful hint if possible
+            if (message.find("Expected ';'") != std::string::npos)
+            {
+                errorMsg << "\n  Hint: Did you forget a semicolon?\n";
+            }
+            else if (message.find("Expected ')'") != std::string::npos)
+            {
+                errorMsg << "\n  Hint: Make sure all parentheses are balanced.\n";
+            }
+            else if (message.find("Expected '}'") != std::string::npos)
+            {
+                errorMsg << "\n  Hint: Make sure all braces are balanced.\n";
+            }
+            else if (message.find("paradigm") != std::string::npos)
+            {
+                errorMsg << "\n  Hint: Add '#pragma paradigm hybrid' at the top of your file.\n";
+            }
+        }
+
+        std::string fullError = errorMsg.str();
+        errors.push_back(fullError);
+        std::cerr << fullError << std::endl;
     }
 
     std::unique_ptr<Function> Parser::function()

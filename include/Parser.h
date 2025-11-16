@@ -13,11 +13,20 @@ namespace lpp
     {
     public:
         explicit Parser(const std::vector<Token> &tokens);
+        explicit Parser(const std::vector<Token> &tokens, const std::string &sourceCode);
         std::unique_ptr<Program> parse();
+
+        // Get accumulated errors
+        const std::vector<std::string> &getErrors() const { return errors; }
+        bool hasErrors() const { return !errors.empty(); }
 
     private:
         std::vector<Token> tokens;
         size_t current = 0;
+        std::vector<std::string> errors;      // Accumulated parse errors
+        bool panicMode = false;               // Error recovery state
+        std::string sourceCode;               // Original source for error context
+        std::vector<std::string> sourceLines; // Split by line for easy access
 
         Token peek() const;
         Token peekNext() const;

@@ -1,0 +1,12 @@
+#pragma paradigm hybrid
+
+fn test() -> int {
+    let x = 10
+    let y = 20;
+    return x + y
+}
+
+fn main() -> int {
+    test()
+    return 0;
+}

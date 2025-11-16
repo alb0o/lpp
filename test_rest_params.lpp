@@ -8,6 +8,15 @@ fn sum(first: int, ...rest) -> int {
     print("First: ");
     print(first);
     print("\n");
+    
+    // Iterate over rest parameters
+    for (let val in rest) {
+        print("Adding: ");
+        print(val);
+        print("\n");
+        total = total + val;
+    }
+    
     return total;
 }
 
@@ -16,14 +25,27 @@ fn greet(greeting: string, name: string, ...titles) -> string {
     print(greeting);
     print(" ");
     print(name);
+    
+    for (let title in titles) {
+        print(", ");
+        print(title);
+    }
+    
     print("\n");
     return greeting;
 }
 
 // Only rest parameter
 fn collect(...items) -> int {
-    print("Collected items\n");
-    return 0;
+    print("Collected items: ");
+    let count = 0;
+    for (let item in items) {
+        print(item);
+        print(" ");
+        count = count + 1;
+    }
+    print("\n");
+    return count;
 }
 
 // Main

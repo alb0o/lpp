@@ -994,6 +994,17 @@ namespace lpp
 
         indentLevel++;
 
+        // Convert rest parameters to vector for easy iteration
+        if (node.hasRestParam)
+        {
+            indent();
+            output << "// Convert variadic pack to vector for iteration\n";
+            indent();
+            output << "auto __rest_vec_" << node.restParamName << " = std::vector{" << node.restParamName << "...};\n";
+            indent();
+            output << "#define " << node.restParamName << " __rest_vec_" << node.restParamName << "\n";
+        }
+
         // For async functions, wrap body in std::async
         if (node.isAsync)
         {
@@ -1005,6 +1016,13 @@ namespace lpp
         for (auto &stmt : node.body)
         {
             stmt->accept(*this);
+        }
+
+        // Undefine rest parameter macro
+        if (node.hasRestParam)
+        {
+            indent();
+            output << "#undef " << node.restParamName << "\n";
         }
 
         if (node.isAsync)
