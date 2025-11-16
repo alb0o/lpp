@@ -1,0 +1,48 @@
+#pragma paradigm hybrid
+
+// Test BUG #1: String escape sequences
+fn testStringEscapes() -> void {
+    let newline = "Hello\nWorld";
+    let tab = "Name:\tValue";
+    let quote = "He said \"Hello\"";
+    let backslash = "Path: C:\\Users\\test";
+    let mixed = "Line1\n\tIndented \"quote\" with \\ backslash";
+}
+
+// Test BUG #2: List comprehension with correct type
+fn testListComprehension() -> void {
+    let squares = [x * x | x in 0..10];
+    let filtered = [x * 2 | x in 0..20, x > 5];
+}
+
+// Test BUG #3: Quantum variables with normalized probabilities
+fn testQuantumNormalization() -> void {
+    // Uniform distribution (auto-normalized)
+    quantum let q1: int = [1, 2, 3];
+    quantum let q2: int = [10, 20, 30];
+    
+    // Weighted distribution - should auto-normalize if sum != 1.0
+    quantum let q3: int = {1: 0.1, 2: 0.2, 3: 0.3};
+    quantum let q4: int = {10: 5.0, 20: 10.0, 30: 15.0};
+    
+    let val1 = q1.observe();
+    let val2 = q2.observe();
+    let val3 = q3.observe();
+    let val4 = q4.observe();
+}
+
+// Test BUG #4: Rest parameters without macro conflicts
+// (Rest parameters tested internally by compiler)
+
+fn testBasicFunction(a: int, b: int) -> int {
+    return a + b;
+}
+
+fn main() -> int {
+    testStringEscapes();
+    testListComprehension();
+    testQuantumNormalization();
+    let result = testBasicFunction(5, 10);
+    
+    return 0;
+}

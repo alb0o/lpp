@@ -1,4 +1,5 @@
 #include "MacroExpander.h"
+#include <iostream>
 #include <sstream>
 #include <algorithm>
 
@@ -27,42 +28,60 @@ namespace lpp
     std::string MacroExpander::expand(const std::string &source)
     {
         std::string result = source;
+        const int MAX_EXPANSION_DEPTH = 100;
+        int expansionCount = 0;
 
-        // Simple token-based expansion
-        for (const auto &pair : macros)
+        bool changed = true;
+        while (changed && expansionCount < MAX_EXPANSION_DEPTH)
         {
-            const std::string &name = pair.first;
-            const MacroDefinition &macro = pair.second;
+            changed = false;
+            std::string previous = result;
 
-            if (!macro.isFunction)
+            // Simple token-based expansion
+            for (const auto &pair : macros)
             {
-                // Object-like macro - simple replacement
-                size_t pos = 0;
-                while ((pos = result.find(name, pos)) != std::string::npos)
-                {
-                    // Check if it's a whole word
-                    bool isWord = true;
-                    if (pos > 0 && (isalnum(result[pos - 1]) || result[pos - 1] == '_'))
-                    {
-                        isWord = false;
-                    }
-                    if (pos + name.length() < result.length() &&
-                        (isalnum(result[pos + name.length()]) || result[pos + name.length()] == '_'))
-                    {
-                        isWord = false;
-                    }
+                const std::string &name = pair.first;
+                const MacroDefinition &macro = pair.second;
 
-                    if (isWord)
+                if (!macro.isFunction)
+                {
+                    // Object-like macro - simple replacement
+                    size_t pos = 0;
+                    while ((pos = result.find(name, pos)) != std::string::npos)
                     {
-                        result.replace(pos, name.length(), macro.body);
-                        pos += macro.body.length();
-                    }
-                    else
-                    {
-                        pos++;
+                        // Check if it's a whole word
+                        bool isWord = true;
+                        if (pos > 0 && (isalnum(result[pos - 1]) || result[pos - 1] == '_'))
+                        {
+                            isWord = false;
+                        }
+                        if (pos + name.length() < result.length() &&
+                            (isalnum(result[pos + name.length()]) || result[pos + name.length()] == '_'))
+                        {
+                            isWord = false;
+                        }
+
+                        if (isWord)
+                        {
+                            result.replace(pos, name.length(), macro.body);
+                            pos += macro.body.length();
+                            changed = true;
+                        }
+                        else
+                        {
+                            pos++;
+                        }
                     }
                 }
             }
+
+            expansionCount++;
+        }
+
+        if (expansionCount >= MAX_EXPANSION_DEPTH)
+        {
+            // Warn about possible recursive macro
+            std::cerr << "Warning: Macro expansion depth limit reached (" << MAX_EXPANSION_DEPTH << "). Possible recursive macro.\n";
         }
 
         return result;

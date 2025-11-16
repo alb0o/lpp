@@ -561,10 +561,50 @@ namespace lpp
         int startCol = column;
         advance(); // consume opening "
 
-        size_t start = current;
+        std::string result;
         while (!isAtEnd() && peek() != '"')
         {
-            advance();
+            if (peek() == '\\')
+            {
+                advance(); // consume backslash
+                if (isAtEnd())
+                {
+                    return Token(TokenType::INVALID, "Unterminated string with escape", line, startCol);
+                }
+
+                char escaped = peek();
+                switch (escaped)
+                {
+                case 'n':
+                    result += '\n';
+                    break;
+                case 't':
+                    result += '\t';
+                    break;
+                case 'r':
+                    result += '\r';
+                    break;
+                case '\\':
+                    result += '\\';
+                    break;
+                case '"':
+                    result += '"';
+                    break;
+                case '0':
+                    result += '\0';
+                    break;
+                default:
+                    result += '\\';
+                    result += escaped;
+                    break;
+                }
+                advance();
+            }
+            else
+            {
+                result += peek();
+                advance();
+            }
         }
 
         if (isAtEnd())
@@ -572,10 +612,9 @@ namespace lpp
             return Token(TokenType::INVALID, "Unterminated string", line, startCol);
         }
 
-        std::string lexeme = source.substr(start, current - start);
         advance(); // consume closing "
 
-        return Token(TokenType::STRING, lexeme, line, startCol);
+        return Token(TokenType::STRING, result, line, startCol);
     }
 
     Token Lexer::identifier()

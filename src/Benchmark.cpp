@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <algorithm>
 
 namespace lpp
 {
@@ -75,7 +76,13 @@ namespace lpp
 
         // Execute and measure time
         auto start = std::chrono::high_resolution_clock::now();
-        system(executable.c_str());
+        // Sanitize executable path
+        std::string sanitized = executable;
+        sanitized.erase(std::remove_if(sanitized.begin(), sanitized.end(),
+                                       [](char c)
+                                       { return c == '&' || c == '|' || c == ';' || c == '`' || c == '$'; }),
+                        sanitized.end());
+        system(sanitized.c_str());
         auto end = std::chrono::high_resolution_clock::now();
 
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);

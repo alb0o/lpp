@@ -13,6 +13,7 @@ namespace lpp
     class ModuleResolver
     {
     public:
+        ModuleResolver() : currentFilePath("."), currentDirectory(".") {}
         ModuleResolver(const std::string &currentFile);
 
         // Resolve import path to absolute file path

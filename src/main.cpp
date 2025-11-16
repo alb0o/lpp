@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <cstdlib>
+#include <algorithm>
 #include "Lexer.h"
 #include "Parser.h"
 #include "Transpiler.h"
@@ -233,9 +234,22 @@ int main(int argc, char *argv[])
 
     // Compile with g++ (or clang++)
     std::cout << "Compiling with g++...\n";
-    std::string compileCommand = "g++ -std=c++17 " + cppFile + " -o " + outputFile;
 
-    int result = system(compileCommand.c_str());
+    // Sanitize path to prevent command injection
+    std::string sanitizedOutput = outputFile;
+    std::string sanitizedCpp = cppFile;
+    // Remove potentially dangerous characters
+    sanitizedOutput.erase(std::remove_if(sanitizedOutput.begin(), sanitizedOutput.end(),
+                                         [](char c)
+                                         { return c == '&' || c == '|' || c == ';' || c == '`' || c == '$'; }),
+                          sanitizedOutput.end());
+    sanitizedCpp.erase(std::remove_if(sanitizedCpp.begin(), sanitizedCpp.end(),
+                                      [](char c)
+                                      { return c == '&' || c == '|' || c == ';' || c == '`' || c == '$'; }),
+                       sanitizedCpp.end());
+
+    std::string safeCommand = "g++ " + sanitizedCpp + " -o " + sanitizedOutput + " -std=c++17";
+    int result = system(safeCommand.c_str());
 
     if (result == 0)
     {

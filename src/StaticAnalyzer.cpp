@@ -18,11 +18,9 @@ namespace lpp
 
         // Run global analyses
         checkMemoryLeak();
-        checkDeadCode();
 
         return issues;
     }
-
     CFGNode *StaticAnalyzer::createNode(CFGNode::Type type)
     {
         auto node = std::make_unique<CFGNode>();
@@ -44,19 +42,203 @@ namespace lpp
 
     void StaticAnalyzer::buildCFG(std::vector<std::unique_ptr<Statement>> &statements)
     {
+        // Clear previous CFG for this function
+        cfg.clear();
+
         entryBlock = createNode(CFGNode::Type::ENTRY);
         exitBlock = createNode(CFGNode::Type::EXIT);
         currentBlock = entryBlock;
 
+        bool reachable = true;
         for (auto &stmt : statements)
         {
-            auto stmtNode = createNode(CFGNode::Type::STATEMENT);
-            stmtNode->stmt = stmt.get();
-            connectNodes(currentBlock, stmtNode);
-            currentBlock = stmtNode;
+            if (reachable)
+            {
+                currentBlock = buildCFGForStatement(stmt.get(), exitBlock, nullptr);
+                if (!currentBlock)
+                {
+                    // Statement doesn't continue (e.g., return without successor)
+                    // Mark remaining statements as unreachable
+                    reachable = false;
+                }
+            }
+            else
+            {
+                // Create orphaned node for unreachable statement (for dead code detection)
+                auto orphanNode = createNode(CFGNode::Type::STATEMENT);
+                orphanNode->stmt = stmt.get();
+                // Don't connect it - it's unreachable!
+            }
         }
 
-        connectNodes(currentBlock, exitBlock);
+        // Connect final block to exit if it exists
+        if (currentBlock && reachable)
+        {
+            connectNodes(currentBlock, exitBlock);
+        }
+    }
+
+    CFGNode *StaticAnalyzer::buildCFGForStatement(Statement *stmt, CFGNode *breakTarget, CFGNode *continueTarget)
+    {
+        if (!stmt)
+            return currentBlock;
+
+        // Check statement type and build appropriate CFG
+
+        // ReturnStmt: Connect to exit and stop
+        if (auto *returnStmt = dynamic_cast<ReturnStmt *>(stmt))
+        {
+            auto stmtNode = createNode(CFGNode::Type::STATEMENT);
+            stmtNode->stmt = stmt;
+            connectNodes(currentBlock, stmtNode);
+            connectNodes(stmtNode, exitBlock);
+            return nullptr; // No continuation after return
+        }
+
+        // BreakStmt: Jump to break target
+        if (auto *breakStmt = dynamic_cast<BreakStmt *>(stmt))
+        {
+            auto stmtNode = createNode(CFGNode::Type::STATEMENT);
+            stmtNode->stmt = stmt;
+            connectNodes(currentBlock, stmtNode);
+            if (breakTarget)
+            {
+                connectNodes(stmtNode, breakTarget);
+            }
+            return nullptr; // No continuation after break
+        }
+
+        // ContinueStmt: Jump to continue target
+        if (auto *continueStmt = dynamic_cast<ContinueStmt *>(stmt))
+        {
+            auto stmtNode = createNode(CFGNode::Type::STATEMENT);
+            stmtNode->stmt = stmt;
+            connectNodes(currentBlock, stmtNode);
+            if (continueTarget)
+            {
+                connectNodes(stmtNode, continueTarget);
+            }
+            return nullptr; // No continuation after continue
+        }
+
+        // IfStmt: Create branch
+        if (auto *ifStmt = dynamic_cast<IfStmt *>(stmt))
+        {
+            auto branchNode = createNode(CFGNode::Type::BRANCH);
+            branchNode->stmt = stmt;
+            branchNode->condition = ifStmt->condition.get();
+            connectNodes(currentBlock, branchNode);
+
+            auto mergeNode = createNode(CFGNode::Type::MERGE);
+
+            // Then branch
+            CFGNode *thenBlock = branchNode;
+            for (auto &thenStmt : ifStmt->thenBranch)
+            {
+                thenBlock = buildCFGForStatement(thenStmt.get(), breakTarget, continueTarget);
+                if (!thenBlock)
+                    break; // Branch ends with return/break/continue
+            }
+            if (thenBlock)
+            {
+                connectNodes(thenBlock, mergeNode);
+            }
+
+            // Else branch
+            CFGNode *elseBlock = branchNode;
+            if (!ifStmt->elseBranch.empty())
+            {
+                for (auto &elseStmt : ifStmt->elseBranch)
+                {
+                    elseBlock = buildCFGForStatement(elseStmt.get(), breakTarget, continueTarget);
+                    if (!elseBlock)
+                        break;
+                }
+            }
+            if (elseBlock)
+            {
+                connectNodes(elseBlock, mergeNode);
+            }
+
+            return mergeNode;
+        }
+
+        // WhileStmt: Create loop
+        if (auto *whileStmt = dynamic_cast<WhileStmt *>(stmt))
+        {
+            auto loopHead = createNode(CFGNode::Type::LOOP_HEAD);
+            loopHead->stmt = stmt;
+            loopHead->condition = whileStmt->condition.get();
+            connectNodes(currentBlock, loopHead);
+
+            auto loopExit = createNode(CFGNode::Type::STATEMENT);
+
+            // Loop body
+            CFGNode *bodyBlock = loopHead;
+            for (auto &bodyStmt : whileStmt->body)
+            {
+                bodyBlock = buildCFGForStatement(bodyStmt.get(), loopExit, loopHead);
+                if (!bodyBlock)
+                    break;
+            }
+
+            // Back edge to loop head
+            if (bodyBlock)
+            {
+                auto backEdge = createNode(CFGNode::Type::LOOP_BACK);
+                connectNodes(bodyBlock, backEdge);
+                connectNodes(backEdge, loopHead);
+            }
+
+            // Exit edge
+            connectNodes(loopHead, loopExit);
+            return loopExit;
+        }
+
+        // ForStmt: Similar to while
+        if (auto *forStmt = dynamic_cast<ForStmt *>(stmt))
+        {
+            // Init (skip - it's a Statement already handled separately if exists)
+            if (forStmt->initializer)
+            {
+                currentBlock = buildCFGForStatement(forStmt->initializer.get(), breakTarget, continueTarget);
+                if (!currentBlock)
+                    return nullptr;
+            }
+
+            auto loopHead = createNode(CFGNode::Type::LOOP_HEAD);
+            loopHead->stmt = stmt;
+            loopHead->condition = forStmt->condition.get();
+            connectNodes(currentBlock, loopHead);
+
+            auto loopExit = createNode(CFGNode::Type::STATEMENT);
+
+            // Loop body
+            CFGNode *bodyBlock = loopHead;
+            for (auto &bodyStmt : forStmt->body)
+            {
+                bodyBlock = buildCFGForStatement(bodyStmt.get(), loopExit, loopHead);
+                if (!bodyBlock)
+                    break;
+            }
+
+            // Increment (just connect back, don't create node for expression)
+            if (bodyBlock)
+            {
+                auto backEdge = createNode(CFGNode::Type::LOOP_BACK);
+                connectNodes(bodyBlock, backEdge);
+                connectNodes(backEdge, loopHead);
+            }
+
+            connectNodes(loopHead, loopExit);
+            return loopExit;
+        }
+
+        // Default: Simple statement
+        auto stmtNode = createNode(CFGNode::Type::STATEMENT);
+        stmtNode->stmt = stmt;
+        connectNodes(currentBlock, stmtNode);
+        return stmtNode;
     }
 
     void StaticAnalyzer::runDataFlowAnalysis()
@@ -278,6 +460,23 @@ namespace lpp
         }
     }
 
+    void StaticAnalyzer::traverseCFG(CFGNode *node)
+    {
+        if (!node || visitedNodes.find(node) != visitedNodes.end())
+        {
+            return; // Already visited or null
+        }
+
+        // Mark as visited
+        visitedNodes.insert(node);
+
+        // Recursively visit all successors (DFS)
+        for (auto *successor : node->successors)
+        {
+            traverseCFG(successor);
+        }
+    }
+
     bool StaticAnalyzer::canBeZero(Expression *expr)
     {
         if (auto *num = dynamic_cast<NumberExpr *>(expr))
@@ -339,7 +538,8 @@ namespace lpp
         issue.type = type;
         issue.severity = severity;
         issue.message = message;
-        issue.line = currentLine;
+        issue.line = currentLine > 0 ? currentLine : 1; // Default to line 1 if not set
+        issue.column = 0;                               // Column tracking not yet implemented
         issue.function = currentFunction;
         issue.notes = notes;
         issues.push_back(issue);
@@ -733,6 +933,16 @@ namespace lpp
 
         // Build CFG for function
         buildCFG(node.body);
+
+        // Traverse CFG to mark reachable nodes
+        visitedNodes.clear();
+        if (entryBlock)
+        {
+            traverseCFG(entryBlock);
+        }
+
+        // Check for dead code in this function
+        checkDeadCode();
 
         // Run data flow analysis
         runDataFlowAnalysis();

@@ -513,7 +513,15 @@ namespace lpp
                 if (check(TokenType::NUMBER))
                 {
                     Token sizeToken = advance();
-                    arraySize = static_cast<int>(std::stod(sizeToken.lexeme));
+                    try
+                    {
+                        arraySize = static_cast<int>(std::stod(sizeToken.lexeme));
+                    }
+                    catch (const std::exception &e)
+                    {
+                        error("Invalid array size: " + sizeToken.lexeme);
+                        arraySize = 0;
+                    }
                 }
 
                 consume(TokenType::RBRACKET, "Expected ']' after array type");
@@ -611,7 +619,15 @@ namespace lpp
 
                     // Parse probability
                     Token probToken = consume(TokenType::NUMBER, "Expected probability (number) after ':'");
-                    probabilities.push_back(std::stod(probToken.lexeme));
+                    try
+                    {
+                        probabilities.push_back(std::stod(probToken.lexeme));
+                    }
+                    catch (const std::exception &e)
+                    {
+                        error("Invalid probability value: " + probToken.lexeme);
+                        probabilities.push_back(0.0);
+                    }
 
                 } while (match(TokenType::COMMA));
             }
@@ -1331,7 +1347,15 @@ namespace lpp
 
         if (match(TokenType::NUMBER))
         {
-            return std::make_unique<NumberExpr>(std::stod(previous().lexeme));
+            try
+            {
+                return std::make_unique<NumberExpr>(std::stod(previous().lexeme));
+            }
+            catch (const std::exception &e)
+            {
+                error("Invalid number format: " + previous().lexeme);
+                return std::make_unique<NumberExpr>(0.0);
+            }
         }
 
         if (match(TokenType::STRING))

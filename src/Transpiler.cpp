@@ -55,7 +55,24 @@ namespace lpp
         writeLine("// Constructor for weighted distribution");
         writeLine("QuantumVar(const std::vector<T>& s, const std::vector<double>& probs)");
         indentLevel++;
-        writeLine(": states(s), probabilities(probs), hasWeights(true), rng(std::chrono::system_clock::now().time_since_epoch().count()) {}");
+        writeLine(": states(s), hasWeights(true), rng(std::chrono::system_clock::now().time_since_epoch().count()) {");
+        indentLevel++;
+        writeLine("// Normalize probabilities to sum to 1.0");
+        writeLine("double sum = 0.0;");
+        writeLine("for (double p : probs) sum += p;");
+        writeLine("if (sum > 0.0) {");
+        indentLevel++;
+        writeLine("for (double p : probs) probabilities.push_back(p / sum);");
+        indentLevel--;
+        writeLine("} else {");
+        indentLevel++;
+        writeLine("// Fallback to uniform if all probabilities are 0");
+        writeLine("double uniformProb = 1.0 / states.size();");
+        writeLine("probabilities = std::vector<double>(states.size(), uniformProb);");
+        indentLevel--;
+        writeLine("}");
+        indentLevel--;
+        writeLine("}");
         indentLevel--;
         writeLine("");
         writeLine("// observe(): Collapse superposition to single state");
@@ -338,7 +355,8 @@ namespace lpp
             {
                 output << ", ";
             }
-            output << "std::vector<auto> " << node.restParamName;
+            // Use variadic template parameter pack
+            output << "typename... RestArgs";
         }
 
         output << ") { return ";
@@ -558,17 +576,28 @@ namespace lpp
         }
         else
         {
-            // Simple array without spread: [1, 2, 3]  =>  std::vector<auto>{1, 2, 3}
-            output << "std::vector<auto>{";
-            for (size_t i = 0; i < node.elements.size(); i++)
+            // Simple array without spread: [1, 2, 3]
+            // Use decltype on first element if available, otherwise int as fallback
+            if (node.elements.empty())
             {
-                node.elements[i]->accept(*this);
-                if (i < node.elements.size() - 1)
-                {
-                    output << ", ";
-                }
+                // Empty array - default to int
+                output << "std::vector<int>{}";
             }
-            output << "}";
+            else
+            {
+                output << "std::vector<decltype(";
+                node.elements[0]->accept(*this);
+                output << ")>{";
+                for (size_t i = 0; i < node.elements.size(); i++)
+                {
+                    node.elements[i]->accept(*this);
+                    if (i < node.elements.size() - 1)
+                    {
+                        output << ", ";
+                    }
+                }
+                output << "}";
+            }
         }
     }
 
@@ -594,7 +623,9 @@ namespace lpp
         // Trasformiamo in un loop che costruisce un vector
         std::string tempVar = "__comp_" + std::to_string(lambdaCounter++);
 
-        output << "([&]() { std::vector<auto> " << tempVar << "; ";
+        output << "([&]() { std::vector<decltype(";
+        node.expression->accept(*this);
+        output << ")> " << tempVar << "; ";
 
         // For loop sul range
         output << "for (auto " << node.variable << " = ";
@@ -646,7 +677,7 @@ namespace lpp
         else
         {
             // Fallback per range non riconosciuto
-            output << "std::vector<auto>{}";
+            output << "std::vector<int>{}";
         }
     }
 
@@ -995,14 +1026,18 @@ namespace lpp
         indentLevel++;
 
         // Convert rest parameters to vector for easy iteration
+        std::string restMacroName;
         if (node.hasRestParam)
         {
+            restMacroName = "__LPP_REST_" + node.restParamName + "_" + std::to_string(lambdaCounter++);
             indent();
             output << "// Convert variadic pack to vector for iteration\n";
             indent();
             output << "auto __rest_vec_" << node.restParamName << " = std::vector{" << node.restParamName << "...};\n";
             indent();
-            output << "#define " << node.restParamName << " __rest_vec_" << node.restParamName << "\n";
+            output << "#define " << restMacroName << " __rest_vec_" << node.restParamName << "\n";
+            indent();
+            output << "#define " << node.restParamName << " " << restMacroName << "\n";
         }
 
         // For async functions, wrap body in std::async
@@ -1018,11 +1053,13 @@ namespace lpp
             stmt->accept(*this);
         }
 
-        // Undefine rest parameter macro
+        // Undefine rest parameter macros
         if (node.hasRestParam)
         {
             indent();
-            output << "#undef " << node.restParamName << "\n";
+            output << "#undef " << node.restParamName << "\\n";
+            indent();
+            output << "#undef " << restMacroName << "\\n";
         }
 
         if (node.isAsync)

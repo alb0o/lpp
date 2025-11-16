@@ -1,0 +1,20 @@
+#pragma paradigm hybrid
+
+fn testDeadCode() -> void {
+    let x = 10;
+    return;
+    let y = 20;  // This is dead code!
+    let z = 30;  // This is also dead code!
+}
+
+fn testReachable() -> void {
+    let a = 1;
+    let b = 2;
+    let c = a + b;
+}
+
+fn main() -> int {
+    testDeadCode();
+    testReachable();
+    return 0;
+}

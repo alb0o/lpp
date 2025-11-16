@@ -4,9 +4,9 @@
 
 **A statically-typed systems language with modern syntax that transpiles to C++**
 
-**🎉 NOW WITH ALL 23 GANG OF FOUR DESIGN PATTERNS! 🎉**
+**🎉 PRODUCTION-READY v0.1 - 101 Features Complete! 🎉**
 
-[Documentation](docs/) • [Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/FULL_SPEC.md) • [Examples](examples/) • [**Pattern Catalog**](docs/COMPLETE_PATTERN_CATALOG.md)
+[Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/LANGUAGE_SPEC.md) • [Advanced Features](docs/ADVANCED_FEATURES.md) • [Design Patterns](docs/DESIGN_PATTERNS.md) • [Examples](examples/)
 
 </div>
 
@@ -70,18 +70,46 @@ autopattern Observer EventBus;
 - 🚀 **Fast Compilation** — Transpiles to C++ then native code
 - ⚡ **High Performance** — Optimized C++ output
 
-## ��� Project Structure
+---
+
+## 📚 Documentation
+
+### Quick Links
+- **[Quick Start Guide](docs/QUICKSTART.md)** - Get started in 5 minutes
+- **[Language Specification](docs/LANGUAGE_SPEC.md)** - Complete language reference
+- **[Advanced Features](docs/ADVANCED_FEATURES.md)** - ES6+, golf operators, generators, quantum
+- **[Design Patterns](docs/DESIGN_PATTERNS.md)** - 23 GoF patterns with autopattern
+- **[Paradigms Guide](docs/PARADIGMS.md)** - Multi-paradigm programming
+- **[Changelog](CHANGELOG.md)** - Version history and bug fixes
+
+### Full Documentation Index
+See **[docs/README.md](docs/README.md)** for complete documentation with topic index.
+
+---
+
+## 🗂️ Project Structure
 
 ```
 lpp/
-├── src/           # Compiler source code
-├── include/       # Header files
-├── stdlib/        # Minimal standard library
-├── examples/      # Sample LPP programs
-├── tests/         # Test suite
-├── docs/          # Documentation
-└── README.md
+├── src/                    # Compiler source code
+├── include/                # Header files
+├── stdlib/                 # Standard library
+├── examples/               # Sample programs
+├── tests/                  # Test suite
+├── docs/                   # 📚 Complete documentation
+│   ├── QUICKSTART.md       # Getting started
+│   ├── LANGUAGE_SPEC.md    # Language reference
+│   ├── ADVANCED_FEATURES.md # Modern features
+│   ├── DESIGN_PATTERNS.md  # Pattern catalog
+│   ├── PARADIGMS.md        # Programming styles
+│   ├── BUG_FIXES.md        # Bug fix history
+│   └── README.md           # Documentation index
+├── vscode-extension/       # VS Code integration
+├── CHANGELOG.md            # Version history
+└── README.md               # This file
 ```
+
+---
 
 ## ��� Quick Start
 
