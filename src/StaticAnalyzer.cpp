@@ -505,6 +505,15 @@ namespace lpp
         }
     }
 
+    void StaticAnalyzer::visit(TupleExpr &node)
+    {
+        // Analyze all tuple elements
+        for (auto &elem : node.elements)
+        {
+            elem->accept(*this);
+        }
+    }
+
     void StaticAnalyzer::visit(ListComprehension &node)
     {
         node.range->accept(*this);
@@ -562,6 +571,25 @@ namespace lpp
             val.state = SymbolicValue::State::UNINITIALIZED;
         }
 
+        symbolTable[node.name] = val;
+    }
+
+    void StaticAnalyzer::visit(QuantumVarDecl &node)
+    {
+        currentLine++;
+
+        // Quantum features are experimental and paradigm-agnostic
+        // No paradigm violation check
+
+        // Analyze all quantum states
+        for (auto &state : node.states)
+        {
+            state->accept(*this);
+        }
+
+        // Register quantum variable
+        SymbolicValue val;
+        val.state = SymbolicValue::State::INITIALIZED;
         symbolTable[node.name] = val;
     }
 
@@ -919,6 +947,16 @@ namespace lpp
         if (node.expr)
         {
             node.expr->accept(*this);
+        }
+    }
+
+    void StaticAnalyzer::visit(QuantumMethodCall &node)
+    {
+        // Quantum method call: observe(), map(), reset(), entangle()
+        // Visit arguments
+        for (auto &arg : node.args)
+        {
+            arg->accept(*this);
         }
     }
 

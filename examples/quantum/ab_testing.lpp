@@ -1,0 +1,155 @@
+// ============================================
+// L++ QUANTUM FEATURES - A/B Testing System
+// ============================================
+// Demonstrating quantum variables for A/B testing
+
+// #pragma experimental quantum
+
+// User session with variant assignment
+class UserSession {
+    let userId: int;
+    let variant: string;
+    let conversionRate: double;
+    
+    fn new(id: int, var: string) -> UserSession {
+        this.userId = id;
+        this.variant = var;
+        this.conversionRate = 0.0;
+        return this;
+    }
+    
+    fn trackConversion(converted: bool) {
+        if (converted) {
+            this.conversionRate = 1.0;
+        }
+    }
+}
+
+// A/B test with quantum variant selection
+fn runABTest(numUsers: int) {
+    // Quantum variant: 50/50 split
+    quantum let variant = {
+        "A": 0.5,  // Control: 50%
+        "B": 0.5   // Treatment: 50%
+    };
+    
+    let conversionsA = 0;
+    let conversionsB = 0;
+    let usersA = 0;
+    let usersB = 0;
+    
+    print("=== A/B Test Simulation ===");
+    print("");
+    
+    for (let i = 0; i < numUsers; i = i + 1) {
+        // Each user gets assigned to a variant
+        let userVariant = variant.observe();
+        
+        // Simulate conversion (variant B has higher conversion rate)
+        quantum let conversion = {
+            true: 0.0,   // Placeholder, will be set below
+            false: 0.0
+        };
+        
+        if (userVariant == "A") {
+            // Control group: 10% conversion
+            usersA = usersA + 1;
+            let converted = (i % 10) == 0; // Simplified: every 10th user converts
+            if (converted) {
+                conversionsA = conversionsA + 1;
+            }
+        }
+        
+        if (userVariant == "B") {
+            // Treatment group: 15% conversion (50% improvement!)
+            usersB = usersB + 1;
+            let converted = (i % 7) == 0; // Simplified: every 7th user converts (~14%)
+            if (converted) {
+                conversionsB = conversionsB + 1;
+            }
+        }
+        
+        // Important: reset variant for next user
+        variant.reset();
+    }
+    
+    print("Results:");
+    print("--------");
+    print("Variant A (Control):");
+    print(usersA);
+    print(conversionsA);
+    print("");
+    print("Variant B (Treatment):");
+    print(usersB);
+    print(conversionsB);
+}
+
+// Multi-variant test (A/B/C/D)
+fn runMultiVariantTest(numUsers: int) {
+    // Quantum variant: 4-way split
+    quantum let variant = {
+        "A": 0.25,  // Control
+        "B": 0.25,  // Variation 1
+        "C": 0.25,  // Variation 2
+        "D": 0.25   // Variation 3
+    };
+    
+    print("");
+    print("=== Multi-Variant Test (A/B/C/D) ===");
+    print("");
+    
+    for (let i = 0; i < numUsers; i = i + 1) {
+        let userVariant = variant.observe();
+        
+        // Each variant shows different UI
+        // (In real system, this would render different components)
+        
+        variant.reset();
+    }
+    
+    print("All users assigned to variants");
+}
+
+// Feature flag with quantum rollout
+fn featureRollout(featureName: string, rolloutPercent: double) {
+    // Quantum feature flag: gradual rollout
+    quantum let enabled = {
+        true: rolloutPercent,
+        false: 1.0 - rolloutPercent
+    };
+    
+    print("");
+    print("=== Feature Rollout ===");
+    print(featureName);
+    print("");
+    
+    // Simulate 100 users
+    let enabledCount = 0;
+    
+    for (let i = 0; i < 100; i = i + 1) {
+        let isEnabled = enabled.observe();
+        
+        if (isEnabled == true) {
+            enabledCount = enabledCount + 1;
+        }
+        
+        enabled.reset();
+    }
+    
+    print("Users with feature enabled:");
+    print(enabledCount);
+}
+
+// Main execution
+fn main() -> int {
+    // Run A/B test with 1000 users
+    runABTest(1000);
+    
+    // Run multi-variant test
+    runMultiVariantTest(1000);
+    
+    // Feature rollout: 20% of users
+    featureRollout("NewCheckoutFlow", 0.20);
+    
+    return 0;
+}

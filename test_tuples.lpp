@@ -1,0 +1,20 @@
+// Test Tuples in L++
+#pragma paradigm hybrid
+
+fn main() -> int {
+    // Two elements
+    let pair = (1, 2);
+    
+    // Three elements with mixed types
+    let triple = ("hello", 42, true);
+    
+    // Nested tuple
+    let nested = ((1, 2), (3, 4));
+    
+    // Tuple with expressions
+    let computed = (2 + 2, 5 * 10, "result");
+    
+    print("Tuples created successfully!");
+    
+    return 0;
+}

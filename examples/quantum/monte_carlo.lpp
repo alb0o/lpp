@@ -1,0 +1,105 @@
+// ============================================
+// L++ QUANTUM FEATURES - Monte Carlo Simulation
+// ============================================
+// Demonstrating quantum variables for Monte Carlo simulations
+
+// #pragma experimental quantum
+
+// Monte Carlo estimation of Pi
+fn estimatePi(samples: int) -> double {
+    quantum let x = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+    quantum let y = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+    
+    let inside = 0;
+    
+    for (let i = 0; i < samples; i = i + 1) {
+        let px = x.observe();
+        let py = y.observe();
+        
+        let distance = px * px + py * py;
+        
+        if (distance <= 1.0) {
+            inside = inside + 1;
+        }
+        
+        // Reset for next sample
+        x.reset();
+        y.reset();
+    }
+    
+    let pi_estimate = 4.0 * inside / samples;
+    return pi_estimate;
+}
+
+// Monte Carlo integration
+fn integrateFunction(samples: int) -> double {
+    // Estimate integral of f(x) = x^2 from 0 to 1
+    quantum let x = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+    
+    let sum = 0.0;
+    
+    for (let i = 0; i < samples; i = i + 1) {
+        let point = x.observe();
+        let value = point * point; // f(x) = x^2
+        sum = sum + value;
+        x.reset();
+    }
+    
+    return sum / samples; // Average value * width (1)
+}
+
+// Risk simulation
+fn simulateInvestment(scenarios: int) -> double {
+    // Quantum scenarios: different market outcomes
+    quantum let returns = {
+        -0.2: 0.05,  // 5% chance of -20% loss
+        -0.1: 0.15,  // 15% chance of -10% loss
+        0.0: 0.20,   // 20% chance of break-even
+        0.1: 0.35,   // 35% chance of 10% gain
+        0.2: 0.20,   // 20% chance of 20% gain
+        0.5: 0.05    // 5% chance of 50% gain (lucky!)
+    };
+    
+    let totalReturn = 0.0;
+    
+    for (let i = 0; i < scenarios; i = i + 1) {
+        let scenario = returns.observe();
+        totalReturn = totalReturn + scenario;
+        returns.reset();
+    }
+    
+    return totalReturn / scenarios;
+}
+
+// Main execution
+fn main() -> int {
+    print("=== Monte Carlo with Quantum Variables ===");
+    print("");
+    
+    // 1. Estimate Pi
+    print("1. Estimating Pi with 1000 samples:");
+    let pi = estimatePi(1000);
+    print(pi);
+    print("");
+    
+    // 2. Integration
+    print("2. Integrating x^2 from 0 to 1 (exact: 0.333):");
+    let integral = integrateFunction(1000);
+    print(integral);
+    print("");
+    
+    // 3. Investment simulation
+    print("3. Average investment return over 10000 scenarios:");
+    let avgReturn = simulateInvestment(10000);
+    print(avgReturn);
+    print("");
+    
+    // 4. Multiple runs comparison
+    print("4. Pi estimation variance (5 runs):");
+    for (let run = 0; run < 5; run = run + 1) {
+        let estimate = estimatePi(500);
+        print(estimate);
+    }
+    
+    return 0;
+}

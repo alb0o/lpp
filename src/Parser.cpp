@@ -274,6 +274,8 @@ namespace lpp
 
     std::unique_ptr<Statement> Parser::statement()
     {
+        if (match(TokenType::QUANTUM))
+            return quantumVarDeclaration();
         if (match(TokenType::LET))
             return varDeclaration();
         if (match(TokenType::IF))
@@ -352,11 +354,14 @@ namespace lpp
             isMutable = true;
         }
 
-        // Check for destructuring: let [a, b] = arr or let {x, y} = obj
-        if (check(TokenType::LBRACKET) || check(TokenType::LBRACE))
+        // Check for destructuring: let [a, b] = arr or let {x, y} = obj or let (a, b) = tuple
+        if (check(TokenType::LBRACKET) || check(TokenType::LBRACE) || check(TokenType::LPAREN))
         {
             bool isArray = check(TokenType::LBRACKET);
-            advance(); // consume [ or {
+            bool isObject = check(TokenType::LBRACE);
+            bool isTuple = check(TokenType::LPAREN);
+
+            advance(); // consume [, {, or (
 
             std::vector<std::string> targets;
             do
@@ -365,14 +370,21 @@ namespace lpp
                 targets.push_back(target.lexeme);
             } while (match(TokenType::COMMA));
 
-            consume(isArray ? TokenType::RBRACKET : TokenType::RBRACE,
-                    isArray ? "Expected ']' after array destructuring" : "Expected '}' after object destructuring");
+            if (isTuple)
+            {
+                consume(TokenType::RPAREN, "Expected ')' after tuple destructuring");
+            }
+            else
+            {
+                consume(isArray ? TokenType::RBRACKET : TokenType::RBRACE,
+                        isArray ? "Expected ']' after array destructuring" : "Expected '}' after object destructuring");
+            }
 
             consume(TokenType::EQUAL, "Expected '=' after destructuring pattern");
             auto source = expression();
             consume(TokenType::SEMICOLON, "Expected ';' after destructuring");
 
-            return std::make_unique<DestructuringStmt>(std::move(targets), std::move(source), isArray);
+            return std::make_unique<DestructuringStmt>(std::move(targets), std::move(source), isArray, isTuple);
         }
 
         Token name = consume(TokenType::IDENTIFIER, "Expected variable name");
@@ -446,6 +458,82 @@ namespace lpp
         varDecl->unionTypes = std::move(unionTypes);
 
         return varDecl;
+    }
+
+    std::unique_ptr<Statement> Parser::quantumVarDeclaration()
+    {
+        // quantum let x = [states] or quantum let x: int = [1,2,3]
+        consume(TokenType::LET, "Expected 'let' after 'quantum'");
+
+        Token name = consume(TokenType::IDENTIFIER, "Expected quantum variable name");
+
+        std::string typeName = "auto"; // Default type inference
+
+        // Optional type annotation: quantum let x: int = [...]
+        if (match(TokenType::COLON))
+        {
+            Token type = advance();
+            typeName = type.lexeme;
+        }
+
+        consume(TokenType::EQUAL, "Expected '=' in quantum variable declaration");
+
+        // Parse states: [state1, state2, ...] or {state: prob, ...}
+        std::vector<std::unique_ptr<Expression>> states;
+        std::vector<double> probabilities;
+        bool hasWeights = false;
+
+        if (match(TokenType::LBRACKET))
+        {
+            // Array of states: [1, 2, 3, 4, 5]
+            if (!check(TokenType::RBRACKET))
+            {
+                do
+                {
+                    states.push_back(expression());
+                } while (match(TokenType::COMMA));
+            }
+            consume(TokenType::RBRACKET, "Expected ']' after quantum states");
+        }
+        else if (match(TokenType::LBRACE))
+        {
+            // Weighted states: {value1: prob1, value2: prob2, ...}
+            hasWeights = true;
+
+            if (!check(TokenType::RBRACE))
+            {
+                do
+                {
+                    // Parse key (state value)
+                    auto stateExpr = expression();
+                    states.push_back(std::move(stateExpr));
+
+                    consume(TokenType::COLON, "Expected ':' after quantum state value");
+
+                    // Parse probability
+                    Token probToken = consume(TokenType::NUMBER, "Expected probability (number) after ':'");
+                    probabilities.push_back(std::stod(probToken.lexeme));
+
+                } while (match(TokenType::COMMA));
+            }
+            consume(TokenType::RBRACE, "Expected '}' after weighted quantum states");
+        }
+        else
+        {
+            error("Expected '[' or '{' for quantum variable initialization");
+        }
+
+        consume(TokenType::SEMICOLON, "Expected ';' after quantum variable declaration");
+
+        if (hasWeights)
+        {
+            return std::make_unique<QuantumVarDecl>(name.lexeme, typeName,
+                                                    std::move(states), std::move(probabilities));
+        }
+        else
+        {
+            return std::make_unique<QuantumVarDecl>(name.lexeme, typeName, std::move(states));
+        }
     }
 
     std::unique_ptr<Statement> Parser::ifStatement()
@@ -968,8 +1056,46 @@ namespace lpp
         {
             if (match(TokenType::DOT))
             {
-                // obj.prop or obj.method()
-                Token propName = consume(TokenType::IDENTIFIER, "Expected property name after '.'");
+                // obj.prop or obj.method() or quantumVar.observe()
+                Token propName = peek(); // initialize with current token
+
+                // Allow quantum keywords as method names
+                if (check(TokenType::OBSERVE))
+                {
+                    propName = advance();
+                }
+                else if (check(TokenType::ENTANGLE))
+                {
+                    propName = advance();
+                }
+                else
+                {
+                    propName = consume(TokenType::IDENTIFIER, "Expected property name after '.'");
+                } // Check for quantum methods: observe, map, reset
+                if (dynamic_cast<IdentifierExpr *>(expr.get()))
+                {
+                    std::string varName = dynamic_cast<IdentifierExpr *>(expr.get())->name;
+                    std::string method = propName.lexeme;
+
+                    if ((method == "observe" || method == "reset" || method == "map") && check(TokenType::LPAREN))
+                    {
+                        advance(); // consume '('
+
+                        std::vector<std::unique_ptr<Expression>> args;
+                        if (!check(TokenType::RPAREN))
+                        {
+                            do
+                            {
+                                args.push_back(expression());
+                            } while (match(TokenType::COMMA));
+                        }
+
+                        consume(TokenType::RPAREN, "Expected ')' after quantum method call");
+                        expr = std::make_unique<QuantumMethodCall>(varName, method, std::move(args));
+                        continue;
+                    }
+                }
+
                 auto propExpr = std::make_unique<IdentifierExpr>(propName.lexeme);
                 expr = std::make_unique<IndexExpr>(std::move(expr), std::move(propExpr), true, false);
             }
@@ -1086,6 +1212,24 @@ namespace lpp
 
     std::unique_ptr<Expression> Parser::primary()
     {
+        // Entangle function: entangle(quantumVar, transformFn)
+        if (match(TokenType::ENTANGLE))
+        {
+            consume(TokenType::LPAREN, "Expected '(' after 'entangle'");
+
+            Token varName = consume(TokenType::IDENTIFIER, "Expected quantum variable name");
+            consume(TokenType::COMMA, "Expected ',' after quantum variable");
+
+            auto transformFn = expression();
+
+            consume(TokenType::RPAREN, "Expected ')' after entangle arguments");
+
+            std::vector<std::unique_ptr<Expression>> args;
+            args.push_back(std::move(transformFn));
+
+            return std::make_unique<QuantumMethodCall>(varName.lexeme, "entangle", std::move(args));
+        }
+
         if (match(TokenType::NUMBER))
         {
             return std::make_unique<NumberExpr>(std::stod(previous().lexeme));
@@ -1301,11 +1445,41 @@ namespace lpp
             return std::make_unique<ObjectExpr>(std::move(properties));
         }
 
+        // Grouping or Tuple: (expr) or (1, 2, 3)
         if (match(TokenType::LPAREN))
         {
-            auto expr = expression();
-            consume(TokenType::RPAREN, "Expected ')' after expression");
-            return expr;
+            // Empty tuple: ()
+            if (check(TokenType::RPAREN))
+            {
+                advance();
+                return std::make_unique<TupleExpr>(std::vector<std::unique_ptr<Expression>>());
+            }
+
+            auto firstExpr = expression();
+
+            // Check if it's a tuple (has comma) or just grouping
+            if (match(TokenType::COMMA))
+            {
+                // It's a tuple: (expr1, expr2, ...)
+                std::vector<std::unique_ptr<Expression>> elements;
+                elements.push_back(std::move(firstExpr));
+
+                do
+                {
+                    if (check(TokenType::RPAREN))
+                        break; // trailing comma
+                    elements.push_back(expression());
+                } while (match(TokenType::COMMA));
+
+                consume(TokenType::RPAREN, "Expected ')' after tuple elements");
+                return std::make_unique<TupleExpr>(std::move(elements));
+            }
+            else
+            {
+                // Just grouping: (expr)
+                consume(TokenType::RPAREN, "Expected ')' after expression");
+                return firstExpr;
+            }
         }
 
         error("Expected expression");

@@ -1,0 +1,44 @@
+#pragma paradigm hybrid
+
+// Test rest parameters in functions
+
+// Basic rest parameter
+fn sum(first: int, ...rest) -> int {
+    let total = first;
+    print("First: ");
+    print(first);
+    print("\n");
+    return total;
+}
+
+// Multiple regular params + rest
+fn greet(greeting: string, name: string, ...titles) -> string {
+    print(greeting);
+    print(" ");
+    print(name);
+    print("\n");
+    return greeting;
+}
+
+// Only rest parameter
+fn collect(...items) -> int {
+    print("Collected items\n");
+    return 0;
+}
+
+// Main
+fn main() -> int {
+    // Test 1: sum with multiple args
+    let result1 = sum(10, 20, 30, 40);
+    print("Result 1: ");
+    print(result1);
+    print("\n");
+    
+    // Test 2: greet with titles
+    let result2 = greet("Hello", "Alice", "Dr", "Prof", "PhD");
+    
+    // Test 3: collect various items
+    let result3 = collect(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    
+    return 0;
+}

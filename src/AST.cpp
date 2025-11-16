@@ -25,6 +25,7 @@ namespace lpp
     void AutoIterateExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void IterateStepExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void ArrayExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void TupleExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void ListComprehension::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void SpreadExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void IndexExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
@@ -36,9 +37,11 @@ namespace lpp
     void YieldExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void TypeOfExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void InstanceOfExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void QuantumMethodCall::accept(ASTVisitor &visitor) { visitor.visit(*this); }
 
     // Statement implementations
     void VarDecl::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void QuantumVarDecl::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void Assignment::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void IfStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void WhileStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }

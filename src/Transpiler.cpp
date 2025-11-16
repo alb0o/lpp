@@ -15,6 +15,7 @@ namespace lpp
         writeLine("#include <string>");
         writeLine("#include <cmath>");
         writeLine("#include <vector>");
+        writeLine("#include <tuple>");
         writeLine("#include <array>");
         writeLine("#include <optional>");
         writeLine("#include <functional>");
@@ -22,6 +23,117 @@ namespace lpp
         writeLine("#include <map>");
         writeLine("#include <any>");
         writeLine("#include <future>");
+        writeLine("#include <random>");
+        writeLine("#include <chrono>");
+        writeLine("");
+
+        // Quantum Variable class template
+        writeLine("// ============ QUANTUM VARIABLE SYSTEM ============");
+        writeLine("template<typename T>");
+        writeLine("class QuantumVar {");
+        writeLine("private:");
+        indentLevel++;
+        writeLine("std::vector<T> states;");
+        writeLine("std::vector<double> probabilities;");
+        writeLine("std::optional<T> collapsed;");
+        writeLine("bool hasWeights;");
+        writeLine("std::mt19937 rng;");
+        indentLevel--;
+        writeLine("");
+        writeLine("public:");
+        indentLevel++;
+        writeLine("// Constructor for uniform distribution");
+        writeLine("QuantumVar(const std::vector<T>& s) ");
+        indentLevel++;
+        writeLine(": states(s), hasWeights(false), rng(std::chrono::system_clock::now().time_since_epoch().count()) {");
+        writeLine("// Equal probability for all states");
+        writeLine("double prob = 1.0 / states.size();");
+        writeLine("probabilities = std::vector<double>(states.size(), prob);");
+        indentLevel--;
+        writeLine("}");
+        writeLine("");
+        writeLine("// Constructor for weighted distribution");
+        writeLine("QuantumVar(const std::vector<T>& s, const std::vector<double>& probs)");
+        indentLevel++;
+        writeLine(": states(s), probabilities(probs), hasWeights(true), rng(std::chrono::system_clock::now().time_since_epoch().count()) {}");
+        indentLevel--;
+        writeLine("");
+        writeLine("// observe(): Collapse superposition to single state");
+        writeLine("T observe() {");
+        indentLevel++;
+        writeLine("if (!collapsed) {");
+        indentLevel++;
+        writeLine("// Weighted random selection");
+        writeLine("std::discrete_distribution<> dist(probabilities.begin(), probabilities.end());");
+        writeLine("int idx = dist(rng);");
+        writeLine("collapsed = states[idx];");
+        indentLevel--;
+        writeLine("}");
+        writeLine("return *collapsed;");
+        indentLevel--;
+        writeLine("}");
+        writeLine("");
+        writeLine("// map(): Transform all states (lazy)");
+        writeLine("template<typename F>");
+        writeLine("auto map(F func) -> QuantumVar<decltype(func(std::declval<T>()))> {");
+        indentLevel++;
+        writeLine("using U = decltype(func(std::declval<T>()));");
+        writeLine("std::vector<U> newStates;");
+        writeLine("for (const auto& state : states) {");
+        indentLevel++;
+        writeLine("newStates.push_back(func(state));");
+        indentLevel--;
+        writeLine("}");
+        writeLine("return QuantumVar<U>(newStates, probabilities);");
+        indentLevel--;
+        writeLine("}");
+        writeLine("");
+        writeLine("// reset(): Return to superposition");
+        writeLine("void reset() {");
+        indentLevel++;
+        writeLine("collapsed.reset();");
+        indentLevel--;
+        writeLine("}");
+        writeLine("");
+        writeLine("// entangle(): Create correlated quantum variable");
+        writeLine("template<typename F>");
+        writeLine("auto entangle(F transform) -> QuantumVar<decltype(transform(std::declval<T>()))> {");
+        indentLevel++;
+        writeLine("using U = decltype(transform(std::declval<T>()));");
+        writeLine("// If already collapsed, entangled var uses same index");
+        writeLine("std::vector<U> entangledStates;");
+        writeLine("for (const auto& state : states) {");
+        indentLevel++;
+        writeLine("entangledStates.push_back(transform(state));");
+        indentLevel--;
+        writeLine("}");
+        writeLine("auto result = QuantumVar<U>(entangledStates, probabilities);");
+        writeLine("if (collapsed) {");
+        indentLevel++;
+        writeLine("// Force same index selection");
+        writeLine("int collapsedIdx = 0;");
+        writeLine("for (size_t i = 0; i < states.size(); ++i) {");
+        indentLevel++;
+        writeLine("if (states[i] == *collapsed) { collapsedIdx = i; break; }");
+        indentLevel--;
+        writeLine("}");
+        writeLine("result.collapsed = entangledStates[collapsedIdx];");
+        indentLevel--;
+        writeLine("}");
+        writeLine("return result;");
+        indentLevel--;
+        writeLine("}");
+        indentLevel--;
+        writeLine("};");
+        writeLine("");
+        writeLine("// Global entangle function");
+        writeLine("template<typename T, typename F>");
+        writeLine("auto entangle(QuantumVar<T>& qvar, F transform) {");
+        indentLevel++;
+        writeLine("return qvar.entangle(transform);");
+        indentLevel--;
+        writeLine("}");
+        writeLine("// ================================================");
         writeLine("");
 
         // Helper function for print
@@ -460,6 +572,22 @@ namespace lpp
         }
     }
 
+    void Transpiler::visit(TupleExpr &node)
+    {
+        // Tuple: (1, 2, 3) => std::make_tuple(1, 2, 3)
+        // Empty tuple: () => std::make_tuple()
+        output << "std::make_tuple(";
+        for (size_t i = 0; i < node.elements.size(); i++)
+        {
+            node.elements[i]->accept(*this);
+            if (i < node.elements.size() - 1)
+            {
+                output << ", ";
+            }
+        }
+        output << ")";
+    }
+
     void Transpiler::visit(ListComprehension &node)
     {
         // [x*2 | x in 0..10, x > 3]
@@ -609,6 +737,51 @@ namespace lpp
             output << " = ";
             node.initializer->accept(*this);
         }
+        output << ";\n";
+    }
+
+    void Transpiler::visit(QuantumVarDecl &node)
+    {
+        indent();
+
+        // Determine element type
+        std::string elementType = mapType(node.type);
+
+        // Generate QuantumVar<T>
+        output << "QuantumVar<" << elementType << "> " << node.name;
+
+        if (node.hasWeights)
+        {
+            // Weighted: QuantumVar<int> x({states}, {probs})
+            output << "({";
+            for (size_t i = 0; i < node.states.size(); i++)
+            {
+                node.states[i]->accept(*this);
+                if (i < node.states.size() - 1)
+                    output << ", ";
+            }
+            output << "}, {";
+            for (size_t i = 0; i < node.probabilities.size(); i++)
+            {
+                output << node.probabilities[i];
+                if (i < node.probabilities.size() - 1)
+                    output << ", ";
+            }
+            output << "})";
+        }
+        else
+        {
+            // Uniform: QuantumVar<int> x({states})
+            output << "({";
+            for (size_t i = 0; i < node.states.size(); i++)
+            {
+                node.states[i]->accept(*this);
+                if (i < node.states.size() - 1)
+                    output << ", ";
+            }
+            output << "})";
+        }
+
         output << ";\n";
     }
 
@@ -762,19 +935,30 @@ namespace lpp
 
     void Transpiler::visit(Function &node)
     {
-        // Generate template for generics
-        if (!node.genericParams.empty())
+        // Generate template for generics and/or rest parameters
+        bool needsTemplate = !node.genericParams.empty() || node.hasRestParam;
+
+        if (needsTemplate)
         {
             indent();
             output << "template<";
+
+            // Generic parameters
             for (size_t i = 0; i < node.genericParams.size(); i++)
             {
                 output << "typename " << node.genericParams[i];
-                if (i < node.genericParams.size() - 1)
+                if (i < node.genericParams.size() - 1 || node.hasRestParam)
                 {
                     output << ", ";
                 }
             }
+
+            // Rest parameter as variadic template
+            if (node.hasRestParam)
+            {
+                output << "typename... RestArgs";
+            }
+
             output << ">\n";
         }
 
@@ -794,20 +978,16 @@ namespace lpp
         for (size_t i = 0; i < node.parameters.size(); i++)
         {
             output << mapType(node.parameters[i].second) << " " << node.parameters[i].first;
-            if (i < node.parameters.size() - 1)
+            if (i < node.parameters.size() - 1 || node.hasRestParam)
             {
                 output << ", ";
             }
         }
 
-        // Rest parameter
+        // Rest parameter as variadic pack
         if (node.hasRestParam)
         {
-            if (!node.parameters.empty())
-            {
-                output << ", ";
-            }
-            output << "std::vector<auto> " << node.restParamName;
+            output << "RestArgs... " << node.restParamName;
         }
 
         output << ") {\n";
@@ -1182,6 +1362,39 @@ namespace lpp
         output << ") != nullptr";
     }
 
+    void Transpiler::visit(QuantumMethodCall &node)
+    {
+        // quantum methods: observe(), map(fn), reset(), entangle(fn)
+        if (node.method == "observe")
+        {
+            output << node.quantumVar << ".observe()";
+        }
+        else if (node.method == "reset")
+        {
+            output << node.quantumVar << ".reset()";
+        }
+        else if (node.method == "map")
+        {
+            // qvar.map(lambda)
+            output << node.quantumVar << ".map(";
+            if (!node.args.empty())
+            {
+                node.args[0]->accept(*this);
+            }
+            output << ")";
+        }
+        else if (node.method == "entangle")
+        {
+            // entangle(qvar, fn) => qvar.entangle(fn)
+            output << node.quantumVar << ".entangle(";
+            if (!node.args.empty())
+            {
+                node.args[0]->accept(*this);
+            }
+            output << ")";
+        }
+    }
+
     // NEW IMPLEMENTATIONS - For, ForIn, DoWhile
     void Transpiler::visit(ForStmt &node)
     {
@@ -1318,7 +1531,22 @@ namespace lpp
     // NEW IMPLEMENTATIONS - Destructuring
     void Transpiler::visit(DestructuringStmt &node)
     {
-        if (node.isArray)
+        if (node.isTuple)
+        {
+            // Tuple destructuring: let (a, b, c) = tuple
+            // Use std::tie or individual std::get
+            indent();
+            output << "auto __tuple_tmp = ";
+            node.source->accept(*this);
+            output << ";\n";
+
+            for (size_t i = 0; i < node.targets.size(); i++)
+            {
+                indent();
+                output << "auto " << node.targets[i] << " = std::get<" << i << ">(__tuple_tmp);\n";
+            }
+        }
+        else if (node.isArray)
         {
             // Array destructuring: let [a, b, c] = arr
             indent();
