@@ -1,0 +1,302 @@
+#pragma paradigm hybrid
+
+// ===============================================
+// FUNCTIONAL PROGRAMMING PATTERNS (20)
+// ===============================================
+// Pure, immutable, composable design patterns
+// for functional programming paradigm
+// ===============================================
+
+// ==================== MONADIC PATTERNS (5) ====================
+
+// 1. Monad - Composable computations with bind/flatMap
+autopattern Monad ResultMonad;
+
+// 2. Functor - Mappable container transformations
+autopattern Functor ListFunctor;
+
+// 3. Applicative - Apply wrapped functions to wrapped values
+autopattern Applicative ValidationApplicative;
+
+// 4. Maybe/Option - Optional values (Nothing/Just)
+autopattern Maybe OptionalValue;
+
+// 5. Either - Error handling with Left/Right
+autopattern Either ErrorResult;
+
+
+// ==================== STRUCTURAL FP PATTERNS (5) ====================
+
+// 6. Monoid - Associative binary operation with identity
+autopattern Monoid StringMonoid;
+
+// 7. Foldable - Reduce/fold operations on structures
+autopattern Foldable TreeFoldable;
+
+// 8. Traversable - Traverse with applicative effects
+autopattern Traversable ListTraversable;
+
+// 9. Lens - Functional references for immutable updates
+autopattern Lens PersonLens;
+
+// 10. Zipper - Cursor-based navigation in structures
+autopattern Zipper ListZipper;
+
+
+// ==================== MONAD TRANSFORMERS (5) ====================
+
+// 11. StateMonad - Stateful computation as pure function
+autopattern StateMonad GameState;
+
+// 12. Reader - Dependency injection / environment monad
+autopattern Reader ConfigReader;
+
+// 13. Writer - Logging/output accumulation monad
+autopattern Writer LogWriter;
+
+// 14. IO - Side-effect encapsulation
+autopattern IO FileIO;
+
+// 15. Continuation - Continuation-Passing Style (CPS)
+autopattern Continuation AsyncContinuation;
+
+
+// ==================== ADVANCED FP PATTERNS (5) ====================
+
+// 16. Free - Abstract Syntax Tree for computations
+autopattern Free DSLProgram;
+
+// 17. Comonad - Dual of Monad (extract/extend)
+autopattern Comonad StreamComonad;
+
+// 18. Church - Data encoded as functions (Church encoding)
+autopattern Church ChurchList;
+
+// 19. AlgebraicEffect - Composable effects with handlers
+autopattern AlgebraicEffect EffectSystem;
+
+// 20. Morphism - Catamorphism/Anamorphism (fold/unfold)
+autopattern Morphism RecursiveScheme;
+
+
+// ===============================================
+// TEST DEMONSTRATIONS
+// ===============================================
+
+function testMonadicPatterns() -> int {
+    // Test Monad
+    let result = ResultMonad();
+    let bound = result.bind(f);
+    let pureValue = ResultMonad::pure(42);
+    
+    // Test Functor
+    let list = ListFunctor();
+    let mapped = list.map(x => x * 2);
+    
+    // Test Applicative
+    let validation = ValidationApplicative();
+    let applied = validation.apply(funcWrapper);
+    let pureApp = ValidationApplicative::pure(value);
+    
+    // Test Maybe
+    let maybe = OptionalValue::just(100);
+    let nothing = OptionalValue::nothing();
+    let value = maybe.getOrElse(0);
+    
+    // Test Either
+    let either = ErrorResult::right("success");
+    let leftValue = ErrorResult::left("error");
+    let folded = either.fold(onLeft, onRight);
+    
+    return 0;
+}
+
+function testStructuralFPPatterns() -> int {
+    // Test Monoid
+    let monoid1 = StringMonoid();
+    let monoid2 = StringMonoid();
+    let combined = monoid1.combine(monoid2);
+    let empty = StringMonoid::empty();
+    
+    // Test Foldable
+    let tree = TreeFoldable();
+    let summed = tree.foldLeft(0, (acc, x) => acc + x);
+    let product = tree.foldRight(1, (x, acc) => x * acc);
+    
+    // Test Traversable
+    let traversable = ListTraversable();
+    let traversed = traversable.traverse(f);
+    let sequenced = traversable.sequence();
+    
+    // Test Lens
+    let lens = PersonLens();
+    let viewed = lens.view(person);
+    let updated = lens.set(person, newValue);
+    let modified = lens.over(person, f);
+    
+    // Test Zipper
+    let zipper = ListZipper();
+    let movedLeft = zipper.moveLeft();
+    let movedRight = zipper.moveRight();
+    let updatedZipper = zipper.update(f);
+    
+    return 0;
+}
+
+function testMonadTransformers() -> int {
+    // Test StateMonad
+    let state = GameState();
+    let nextState = state.bind(f);
+    let currentState = GameState::get();
+    let newState = GameState::put(updatedState);
+    
+    // Test Reader
+    let reader = ConfigReader();
+    let env = ConfigReader::ask();
+    let modified = reader.local(f);
+    
+    // Test Writer
+    let writer = LogWriter();
+    let logged = Writer::tell("Log message");
+    let withLog = writer.listen();
+    
+    // Test IO
+    let io = FileIO();
+    let executed = io.unsafePerformIO();
+    let chained = io.bind(f);
+    
+    // Test Continuation
+    let cont = AsyncContinuation();
+    let withCC = cont.callCC(f);
+    let continued = cont.bind(nextCont);
+    
+    return 0;
+}
+
+function testAdvancedFPPatterns() -> int {
+    // Test Free
+    let program = DSLProgram::pure(value);
+    let impure = DSLProgram::impure(effect);
+    let interpreted = program.interpret(interpreter);
+    
+    // Test Comonad
+    let comonad = StreamComonad();
+    let extracted = comonad.extract();
+    let extended = comonad.extend(f);
+    let duplicated = comonad.duplicate();
+    
+    // Test Church
+    let church = ChurchList::encode(value);
+    let decoded = church.fold(onValue, onEmpty);
+    
+    // Test AlgebraicEffect
+    let effect = EffectSystem();
+    let performed = effect.perform(eff);
+    let handled = effect.handle(handler);
+    
+    // Test Morphism
+    let folded = RecursiveScheme::cata(algebra, structure);
+    let unfolded = RecursiveScheme::ana(coalgebra, seed);
+    let transformed = RecursiveScheme::hylo(alg, coalg, seed);
+    
+    return 0;
+}
+
+// ===============================================
+// FUNCTIONAL COMPOSITION EXAMPLES
+// ===============================================
+
+function composeFunctors() -> ListFunctor {
+    let list = ListFunctor();
+    
+    // Chain multiple functorial maps
+    let result = list
+        .map(x => x * 2)
+        .map(x => x + 1)
+        .map(x => x.toString());
+    
+    return result;
+}
+
+function composeMonads() -> ResultMonad {
+    let monad = ResultMonad::pure(10);
+    
+    // Monadic composition (bind/flatMap chaining)
+    let result = monad
+        .bind(x => ResultMonad::pure(x * 2))
+        .bind(x => ResultMonad::pure(x + 5))
+        .bind(x => ResultMonad::pure(x / 3));
+    
+    return result;
+}
+
+function handleErrors() -> Either {
+    let computation = ErrorResult::right(42);
+    
+    // Error handling with Either
+    let result = computation.fold(
+        error => {
+            print("Error: " + error);
+            return 0;
+        },
+        success => {
+            print("Success: " + success.toString());
+            return success;
+        }
+    );
+    
+    return computation;
+}
+
+function lensComposition() -> Person {
+    let personLens = PersonLens();
+    let addressLens = AddressLens();
+    
+    // Compose lenses for deep immutable updates
+    let person = Person { name: "Alice", address: Address { street: "Main" } };
+    
+    // Update nested field immutably
+    let updated = personLens
+        .compose(addressLens)
+        .set(person, "New Street");
+    
+    return updated;
+}
+
+function traverseWithEffects() -> Applicative<List<int>> {
+    let list = ListTraversable();
+    
+    // Traverse list with effectful computation
+    let result = list.traverse(x => {
+        // Effectful operation (returns Applicative)
+        return ValidationApplicative::pure(x * 2);
+    });
+    
+    // Result: Applicative<List<int>>
+    return result;
+}
+
+// ===============================================
+// MAIN ENTRY POINT
+// ===============================================
+
+function main() -> int {
+    print("Testing Functional Programming Patterns...");
+    
+    // Test all pattern categories
+    testMonadicPatterns();
+    testStructuralFPPatterns();
+    testMonadTransformers();
+    testAdvancedFPPatterns();
+    
+    // Test compositions
+    composeFunctors();
+    composeMonads();
+    handleErrors();
+    lensComposition();
+    traverseWithEffects();
+    
+    print("All 20 FP patterns tested successfully!");
+    
+    return 0;
+}

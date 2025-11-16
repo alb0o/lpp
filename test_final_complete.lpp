@@ -1,0 +1,152 @@
+#pragma paradigm hybrid
+
+// ===== COMPREHENSIVE L++ FEATURE TEST =====
+// Tests all major language features
+
+// Enums
+enum Color { RED, GREEN, BLUE }
+
+// Generic class with properties
+class Container {
+    let data: string;
+    let size: int;
+    
+    fn create(value: string) -> Container {
+        this.data = value;
+        this.size = 1;
+        return this;
+    }
+    
+    fn get() -> string {
+        this.data;
+    }
+}
+
+// Generic function
+fn identity<T>(x: T) -> T {
+    x;
+}
+
+// Async function
+async fn fetchData() -> string {
+    await someAsyncCall();
+    return "data";
+}
+
+// Function with all operator types
+fn testOperators(x: int, y: int) -> int {
+    // Compound assignments
+    let a = 10;
+    a += 5;
+    a -= 2;
+    a *= 3;
+    a /= 2;
+    
+    // Increment/decrement
+    let b = 0;
+    b++;
+    ++b;
+    b--;
+    --b;
+    
+    // Comparison and logic
+    if (x > y && x != 0 || y < 100) {
+        return x;
+    }
+    
+    // Ternary
+    ?x > y -> x $ y;
+}
+
+// Classic for loop
+fn sumRange(n: int) -> int {
+    let total = 0;
+    for (let i = 0; i < n; i++) {
+        total += i;
+    }
+    total;
+}
+
+// For-in loop
+fn processArray() -> void {
+    let arr = [1, 2, 3];
+    for (let item in arr) {
+        print(item);
+    }
+}
+
+// While and do-while
+fn countDown(n: int) -> void {
+    while (n > 0) {
+        n--;
+    }
+    
+    do {
+        n++;
+    } while (n < 5);
+}
+
+// Switch statement
+fn checkValue(x: int) -> string {
+    switch (x) {
+        case 1: return "one";
+        case 2: return "two";
+        default: return "other";
+    }
+}
+
+// Try-catch
+fn safeOperation() -> void {
+    try {
+        let x = riskyFunction();
+    } catch (e) {
+        print("Error");
+    }
+}
+
+// Pipe operator
+fn pipeline() -> int {
+    let result = 5 |> double |> increment;
+    result;
+}
+
+fn double(x: int) -> int { x * 2; }
+fn increment(x: int) -> int { x + 1; }
+
+// Nullish coalescing
+fn getDefault(x: int?) -> int {
+    x ?? 42;
+}
+
+// Type casting
+fn castExample() -> void {
+    let x = 3.14;
+    let y = x as int;
+}
+
+// Main function
+fn main() -> void {
+    // Test generics
+    let box = identity<int>(42);
+    let container = Container().create("hello");
+    
+    // Test operators
+    let result = testOperators(10, 5);
+    
+    // Test loops
+    let sum = sumRange(10);
+    processArray();
+    countDown(3);
+    
+    // Test control flow
+    let value = checkValue(1);
+    safeOperation();
+    
+    // Test pipe
+    let piped = pipeline();
+    
+    // Test nullish
+    let def = getDefault(null);
+    
+    print("All features tested!");
+}

@@ -1,0 +1,15 @@
+#pragma paradigm functional
+
+fn add(a: int, b: int) -> int {
+    a + b;
+}
+
+fn max(a: int, b: int) -> int {
+    ?a > b -> a $ b;
+}
+
+fn main() -> void {
+    let sum = add(5, 3);
+    let maximum = max(10, 20);
+    print("Works!");
+}

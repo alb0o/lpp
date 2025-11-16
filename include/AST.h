@@ -15,6 +15,7 @@ namespace lpp
         FUNCTIONAL, // Immutability, pure functions, no classes
         IMPERATIVE, // Performance-oriented, explicit control flow
         OOP,        // Object-oriented with classes and inheritance
+        GOLFED,     // Code golf: minimal syntax, shortest possible code
         NONE        // No pragma specified (error state)
     };
 
@@ -99,6 +100,18 @@ namespace lpp
 
         UnaryExpr(const std::string &o, std::unique_ptr<Expression> operand)
             : op(o), operand(std::move(operand)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Postfix expression: x++ or x--
+    class PostfixExpr : public Expression
+    {
+    public:
+        std::unique_ptr<Expression> operand;
+        std::string op; // "++" or "--"
+
+        PostfixExpr(std::unique_ptr<Expression> operand, const std::string &o)
+            : operand(std::move(operand)), op(o) {}
         void accept(ASTVisitor &visitor) override;
     };
 
@@ -340,6 +353,73 @@ namespace lpp
         void accept(ASTVisitor &visitor) override;
     };
 
+    // Cast expression: x as int
+    class CastExpr : public Expression
+    {
+    public:
+        std::unique_ptr<Expression> expression;
+        std::string targetType;
+
+        CastExpr(std::unique_ptr<Expression> expr, const std::string &type)
+            : expression(std::move(expr)), targetType(type) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Await expression: await promise
+    class AwaitExpr : public Expression
+    {
+    public:
+        std::unique_ptr<Expression> expression;
+
+        explicit AwaitExpr(std::unique_ptr<Expression> expr)
+            : expression(std::move(expr)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Throw expression: throw error
+    class ThrowExpr : public Expression
+    {
+    public:
+        std::unique_ptr<Expression> expression;
+
+        explicit ThrowExpr(std::unique_ptr<Expression> expr)
+            : expression(std::move(expr)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Yield expression for generators
+    class YieldExpr : public Expression
+    {
+    public:
+        std::unique_ptr<Expression> value;
+
+        explicit YieldExpr(std::unique_ptr<Expression> val = nullptr)
+            : value(std::move(val)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Type guard expressions
+    class TypeOfExpr : public Expression
+    {
+    public:
+        std::unique_ptr<Expression> expr;
+
+        explicit TypeOfExpr(std::unique_ptr<Expression> e)
+            : expr(std::move(e)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    class InstanceOfExpr : public Expression
+    {
+    public:
+        std::unique_ptr<Expression> expr;
+        std::string typeName;
+
+        InstanceOfExpr(std::unique_ptr<Expression> e, const std::string &type)
+            : expr(std::move(e)), typeName(type) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
     // Statements
     class Statement : public ASTNode
     {
@@ -351,6 +431,10 @@ namespace lpp
         std::string name;
         std::string type;
         std::unique_ptr<Expression> initializer;
+        bool isArrayType = false;            // true for int[], string[], etc.
+        int arraySize = -1;                  // -1 for dynamic, > 0 for fixed size
+        bool isNullable = false;             // true for int?, string?
+        std::vector<std::string> unionTypes; // for union types: int | string
 
         VarDecl(const std::string &n, const std::string &t, std::unique_ptr<Expression> init)
             : name(n), type(t), initializer(std::move(init)) {}
@@ -411,11 +495,12 @@ namespace lpp
     struct CaseClause
     {
         std::unique_ptr<Expression> value; // nullptr for default case
+        std::unique_ptr<Expression> guard; // when condition (optional)
         std::vector<std::unique_ptr<Statement>> statements;
         bool isDefault;
 
-        CaseClause(std::unique_ptr<Expression> val, std::vector<std::unique_ptr<Statement>> stmts, bool isDef = false)
-            : value(std::move(val)), statements(std::move(stmts)), isDefault(isDef) {}
+        CaseClause(std::unique_ptr<Expression> val, std::vector<std::unique_ptr<Statement>> stmts, bool isDef = false, std::unique_ptr<Expression> grd = nullptr)
+            : value(std::move(val)), statements(std::move(stmts)), isDefault(isDef), guard(std::move(grd)) {}
     };
 
     class SwitchStmt : public Statement
@@ -429,12 +514,139 @@ namespace lpp
         void accept(ASTVisitor &visitor) override;
     };
 
+    // For loop: for (init; cond; update) { body }
+    class ForStmt : public Statement
+    {
+    public:
+        std::unique_ptr<Statement> initializer;
+        std::unique_ptr<Expression> condition;
+        std::unique_ptr<Expression> increment;
+        std::vector<std::unique_ptr<Statement>> body;
+
+        ForStmt(std::unique_ptr<Statement> init,
+                std::unique_ptr<Expression> cond,
+                std::unique_ptr<Expression> inc,
+                std::vector<std::unique_ptr<Statement>> b)
+            : initializer(std::move(init)), condition(std::move(cond)),
+              increment(std::move(inc)), body(std::move(b)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // For-in loop: for (var in array) { body }
+    class ForInStmt : public Statement
+    {
+    public:
+        std::string variable;
+        std::unique_ptr<Expression> iterable;
+        std::vector<std::unique_ptr<Statement>> body;
+
+        ForInStmt(const std::string &var,
+                  std::unique_ptr<Expression> iter,
+                  std::vector<std::unique_ptr<Statement>> b)
+            : variable(var), iterable(std::move(iter)), body(std::move(b)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Do-while loop: do { body } while (cond);
+    class DoWhileStmt : public Statement
+    {
+    public:
+        std::vector<std::unique_ptr<Statement>> body;
+        std::unique_ptr<Expression> condition;
+
+        DoWhileStmt(std::vector<std::unique_ptr<Statement>> b,
+                    std::unique_ptr<Expression> cond)
+            : body(std::move(b)), condition(std::move(cond)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Try-catch-finally: try { } catch (e) { } finally { }
+    class TryCatchStmt : public Statement
+    {
+    public:
+        std::vector<std::unique_ptr<Statement>> tryBlock;
+        std::string catchVariable;
+        std::vector<std::unique_ptr<Statement>> catchBlock;
+        std::vector<std::unique_ptr<Statement>> finallyBlock;
+
+        TryCatchStmt(std::vector<std::unique_ptr<Statement>> tryB,
+                     const std::string &catchVar,
+                     std::vector<std::unique_ptr<Statement>> catchB,
+                     std::vector<std::unique_ptr<Statement>> finallyB = {})
+            : tryBlock(std::move(tryB)), catchVariable(catchVar),
+              catchBlock(std::move(catchB)), finallyBlock(std::move(finallyB)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Destructuring assignment: let [a, b] = arr or let {x, y} = obj
+    class DestructuringStmt : public Statement
+    {
+    public:
+        std::vector<std::string> targets; // variable names
+        std::unique_ptr<Expression> source;
+        bool isArray; // true for array, false for object
+
+        DestructuringStmt(std::vector<std::string> tgts,
+                          std::unique_ptr<Expression> src,
+                          bool arr)
+            : targets(std::move(tgts)), source(std::move(src)), isArray(arr) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Enum declaration: enum Color { Red, Green, Blue }
+    class EnumDecl : public Statement
+    {
+    public:
+        std::string name;
+        std::vector<std::pair<std::string, int>> values; // (name, value)
+
+        EnumDecl(const std::string &n, std::vector<std::pair<std::string, int>> vals)
+            : name(n), values(std::move(vals)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
     class ReturnStmt : public Statement
     {
     public:
         std::unique_ptr<Expression> value;
 
         explicit ReturnStmt(std::unique_ptr<Expression> val) : value(std::move(val)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Import statement: import { foo, bar } from "module"
+    class ImportStmt : public Statement
+    {
+    public:
+        std::vector<std::string> imports; // names to import
+        std::string module;               // module path
+        bool importAll = false;           // true for import * as name
+
+        ImportStmt(std::vector<std::string> imps, const std::string &mod, bool all = false)
+            : imports(std::move(imps)), module(mod), importAll(all) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Export statement: export fn foo() { }
+    class ExportStmt : public Statement
+    {
+    public:
+        std::unique_ptr<Statement> declaration; // function, class, etc.
+
+        explicit ExportStmt(std::unique_ptr<Statement> decl) : declaration(std::move(decl)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Auto-generated design pattern statement
+    class AutoPatternStmt : public Statement
+    {
+    public:
+        std::string problemType; // e.g., "Configuration", "Logging", "DataAccess"
+        std::string className;
+        std::string patternType; // auto-detected: Singleton, Factory, Observer, etc.
+
+        AutoPatternStmt(const std::string &problem, const std::string &name)
+            : problemType(problem), className(name) {}
         void accept(ASTVisitor &visitor) override;
     };
 
@@ -454,8 +666,14 @@ namespace lpp
         std::vector<std::pair<std::string, std::string>> parameters; // (name, type)
         std::string returnType;
         std::vector<std::unique_ptr<Statement>> body;
-        bool hasRestParam = false;      // true if last param is ...rest
-        std::string restParamName = ""; // name of rest parameter
+        bool hasRestParam = false;              // true if last param is ...rest
+        std::string restParamName = "";         // name of rest parameter
+        bool isAsync = false;                   // true for async functions
+        bool isGenerator = false;               // true for generator functions (uses yield)
+        bool isPrototype = false;               // true for forward declarations
+        bool isGetter = false;                  // true for getter methods
+        bool isSetter = false;                  // true for setter methods
+        std::vector<std::string> genericParams; // for generics: <T, U>
 
         Function(const std::string &n,
                  std::vector<std::pair<std::string, std::string>> params,
@@ -477,6 +695,7 @@ namespace lpp
         std::vector<std::pair<std::string, std::string>> properties; // (name, type)
         std::vector<std::unique_ptr<Function>> methods;
         std::unique_ptr<Function> constructor;
+        std::string designPattern = ""; // for @pattern: Singleton, Factory, Observer, etc.
 
         ClassDecl(const std::string &n,
                   const std::string &base,
@@ -520,18 +739,25 @@ namespace lpp
     {
     public:
         ParadigmMode paradigm;
+        std::vector<std::unique_ptr<Statement>> imports;
+        std::vector<std::unique_ptr<Statement>> exports;
         std::vector<std::unique_ptr<Function>> functions;
         std::vector<std::unique_ptr<ClassDecl>> classes;
         std::vector<std::unique_ptr<InterfaceDecl>> interfaces;
         std::vector<std::unique_ptr<TypeDecl>> types;
+        std::vector<std::unique_ptr<Statement>> enums;
 
         Program(ParadigmMode pm,
                 std::vector<std::unique_ptr<Function>> funcs,
                 std::vector<std::unique_ptr<ClassDecl>> cls = {},
                 std::vector<std::unique_ptr<InterfaceDecl>> intfs = {},
-                std::vector<std::unique_ptr<TypeDecl>> tps = {})
-            : paradigm(pm), functions(std::move(funcs)), classes(std::move(cls)),
-              interfaces(std::move(intfs)), types(std::move(tps)) {}
+                std::vector<std::unique_ptr<TypeDecl>> tps = {},
+                std::vector<std::unique_ptr<Statement>> enms = {},
+                std::vector<std::unique_ptr<Statement>> imps = {},
+                std::vector<std::unique_ptr<Statement>> exps = {})
+            : paradigm(pm), imports(std::move(imps)), exports(std::move(exps)),
+              functions(std::move(funcs)), classes(std::move(cls)),
+              interfaces(std::move(intfs)), types(std::move(tps)), enums(std::move(enms)) {}
         void accept(ASTVisitor &visitor) override;
     };
 
@@ -548,6 +774,7 @@ namespace lpp
         virtual void visit(IdentifierExpr &node) = 0;
         virtual void visit(BinaryExpr &node) = 0;
         virtual void visit(UnaryExpr &node) = 0;
+        virtual void visit(PostfixExpr &node) = 0;
         virtual void visit(CallExpr &node) = 0;
         virtual void visit(LambdaExpr &node) = 0;
         virtual void visit(TernaryIfExpr &node) = 0;
@@ -566,15 +793,30 @@ namespace lpp
         virtual void visit(IndexExpr &node) = 0;
         virtual void visit(ObjectExpr &node) = 0;
         virtual void visit(MatchExpr &node) = 0;
+        virtual void visit(CastExpr &node) = 0;
+        virtual void visit(AwaitExpr &node) = 0;
+        virtual void visit(ThrowExpr &node) = 0;
+        virtual void visit(YieldExpr &node) = 0;
+        virtual void visit(TypeOfExpr &node) = 0;
+        virtual void visit(InstanceOfExpr &node) = 0;
 
         virtual void visit(VarDecl &node) = 0;
         virtual void visit(Assignment &node) = 0;
         virtual void visit(IfStmt &node) = 0;
         virtual void visit(WhileStmt &node) = 0;
         virtual void visit(SwitchStmt &node) = 0;
+        virtual void visit(ForStmt &node) = 0;
+        virtual void visit(ForInStmt &node) = 0;
+        virtual void visit(DoWhileStmt &node) = 0;
+        virtual void visit(TryCatchStmt &node) = 0;
+        virtual void visit(DestructuringStmt &node) = 0;
+        virtual void visit(EnumDecl &node) = 0;
         virtual void visit(BreakStmt &node) = 0;
         virtual void visit(ContinueStmt &node) = 0;
         virtual void visit(ReturnStmt &node) = 0;
+        virtual void visit(ImportStmt &node) = 0;
+        virtual void visit(ExportStmt &node) = 0;
+        virtual void visit(AutoPatternStmt &node) = 0;
         virtual void visit(ExprStmt &node) = 0;
 
         virtual void visit(Function &node) = 0;

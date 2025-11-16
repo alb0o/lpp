@@ -20,6 +20,7 @@ namespace lpp
         void visit(IdentifierExpr &node) override;
         void visit(BinaryExpr &node) override;
         void visit(UnaryExpr &node) override;
+        void visit(PostfixExpr &node) override;
         void visit(CallExpr &node) override;
         void visit(LambdaExpr &node) override;
         void visit(TernaryIfExpr &node) override;
@@ -38,15 +39,30 @@ namespace lpp
         void visit(IndexExpr &node) override;
         void visit(ObjectExpr &node) override;
         void visit(MatchExpr &node) override;
+        void visit(CastExpr &node) override;
+        void visit(AwaitExpr &node) override;
+        void visit(ThrowExpr &node) override;
+        void visit(YieldExpr &node) override;
+        void visit(TypeOfExpr &node) override;
+        void visit(InstanceOfExpr &node) override;
 
         void visit(VarDecl &node) override;
         void visit(Assignment &node) override;
         void visit(IfStmt &node) override;
         void visit(WhileStmt &node) override;
         void visit(SwitchStmt &node) override;
+        void visit(ForStmt &node) override;
+        void visit(ForInStmt &node) override;
+        void visit(DoWhileStmt &node) override;
+        void visit(TryCatchStmt &node) override;
+        void visit(DestructuringStmt &node) override;
+        void visit(EnumDecl &node) override;
         void visit(BreakStmt &node) override;
         void visit(ContinueStmt &node) override;
         void visit(ReturnStmt &node) override;
+        void visit(ImportStmt &node) override;
+        void visit(ExportStmt &node) override;
+        void visit(AutoPatternStmt &node) override;
         void visit(ExprStmt &node) override;
 
         void visit(Function &node) override;

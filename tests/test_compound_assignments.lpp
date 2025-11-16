@@ -1,0 +1,29 @@
+#pragma paradigm hybrid
+
+// Test compound assignments
+
+fn testCompoundAssignments() -> void {
+    let x = 10;
+    
+    // Test +=
+    x += 5;
+    print("After x += 5:");
+    
+    // Test -=
+    x -= 3;
+    print("After x -= 3:");
+    
+    // Test *=
+    x *= 2;
+    print("After x *= 2:");
+    
+    // Test /=
+    x /= 4;
+    print("After x /= 4:");
+    
+    print("Compound assignments completed!");
+}
+
+fn main() -> void {
+    testCompoundAssignments();
+}

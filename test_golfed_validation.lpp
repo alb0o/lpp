@@ -1,0 +1,13 @@
+#pragma paradigm golfed
+
+fn calculateSum(a: int, b: int) -> int {
+    return a + b;
+}
+
+fn add(a: int, b: int) -> int {
+    return a + b;
+}
+
+fn s(x: int) -> int {
+    return x * 2;
+}

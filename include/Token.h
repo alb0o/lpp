@@ -42,6 +42,7 @@ namespace lpp
         OF,
         MATCH,
         CLASS,
+        ENUM,
         CONSTRUCTOR,
         EXTENDS,
         IMPLEMENTS,
@@ -65,8 +66,15 @@ namespace lpp
         EXPORT,
         FROM,
         AS,
+        AUTOPATTERN, // Automatic design pattern generation
         NULL_KW,
         UNDEFINED,
+        YIELD,      // Generator yield
+        TYPEOF,     // Type guard
+        INSTANCEOF, // Type guard
+        GET,        // Getter
+        SET,        // Setter
+        WHEN,       // Guard condition in switch/match
 
         // Types
         TYPE_INT,
@@ -128,8 +136,9 @@ namespace lpp
         SEMICOLON,
         COMMA,
         COLON,
-        ARROW,     // -> (return type, lambda with type inference)
-        FAT_ARROW, // => (lambda shorthand, always infers types)
+        ARROW,      // -> (return type, lambda with type inference)
+        FAT_ARROW,  // => (lambda shorthand, implicit return)
+        ARROW_LEFT, // <- (alternative return syntax)
         DOT,
         DOT_DOT,           // .. (range)
         DOT_DOT_DOT,       // ... (spread/rest)

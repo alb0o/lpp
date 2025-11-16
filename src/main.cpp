@@ -155,6 +155,21 @@ int main(int argc, char *argv[])
         case lpp::IssueType::BUFFER_OVERFLOW:
             std::cerr << "BUFFER-OVERFLOW";
             break;
+        case lpp::IssueType::PARADIGM_MUTATION_IN_FUNCTIONAL:
+            std::cerr << "PARADIGM-FUNC";
+            break;
+        case lpp::IssueType::PARADIGM_CLASS_IN_FUNCTIONAL:
+            std::cerr << "PARADIGM-FUNC";
+            break;
+        case lpp::IssueType::PARADIGM_CLASS_IN_IMPERATIVE:
+            std::cerr << "PARADIGM-IMP";
+            break;
+        case lpp::IssueType::PARADIGM_GOLF_DISCOURAGED:
+            std::cerr << "PARADIGM-GOLF";
+            break;
+        case lpp::IssueType::PARADIGM_GOLF_ENCOURAGED:
+            std::cerr << "PARADIGM-GOLF";
+            break;
         default:
             std::cerr << "UNKNOWN";
         }

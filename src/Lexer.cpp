@@ -32,6 +32,7 @@ namespace lpp
         {"of", TokenType::OF},
         {"match", TokenType::MATCH},
         {"class", TokenType::CLASS},
+        {"enum", TokenType::ENUM},
         {"constructor", TokenType::CONSTRUCTOR},
         {"extends", TokenType::EXTENDS},
         {"implements", TokenType::IMPLEMENTS},
@@ -55,8 +56,15 @@ namespace lpp
         {"export", TokenType::EXPORT},
         {"from", TokenType::FROM},
         {"as", TokenType::AS},
+        {"autopattern", TokenType::AUTOPATTERN},
         {"null", TokenType::NULL_KW},
         {"undefined", TokenType::UNDEFINED},
+        {"yield", TokenType::YIELD},
+        {"typeof", TokenType::TYPEOF},
+        {"instanceof", TokenType::INSTANCEOF},
+        {"get", TokenType::GET},
+        {"set", TokenType::SET},
+        {"when", TokenType::WHEN},
         {"int", TokenType::TYPE_INT},
         {"float", TokenType::TYPE_FLOAT},
         {"string", TokenType::TYPE_STRING},
@@ -69,7 +77,8 @@ namespace lpp
         {"hybrid", TokenType::IDENTIFIER},
         {"functional", TokenType::IDENTIFIER},
         {"imperative", TokenType::IDENTIFIER},
-        {"oop", TokenType::IDENTIFIER}};
+        {"oop", TokenType::IDENTIFIER},
+        {"golfed", TokenType::IDENTIFIER}};
 
     Lexer::Lexer(const std::string &source) : source(source) {}
 
@@ -312,7 +321,11 @@ namespace lpp
                 }
                 break;
             case '<':
-                if (match('<'))
+                if (match('-'))
+                {
+                    tokens.push_back(makeToken(TokenType::ARROW_LEFT, "<-"));
+                }
+                else if (match('<'))
                 {
                     tokens.push_back(makeToken(TokenType::LESS_LESS, "<<"));
                 }

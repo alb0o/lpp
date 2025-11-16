@@ -1,0 +1,40 @@
+#pragma paradigm functional
+
+// Test ALTERNATIVE RETURN SYNTAX - Feature #100
+// In functional paradigm: implicit return (last expression is returned)
+
+// Traditional return
+fn traditional(x: int) -> int {
+    return x * 2;
+}
+
+// Implicit return (last expression)
+fn implicit(x: int) -> int {
+    x * 2  // No semicolon, no return keyword - IMPLICIT RETURN
+}
+
+// Arrow function shorthand (already exists with =>)
+fn shorthand() -> int => 42
+
+// Expression-based return
+fn expressionBased(x: int, y: int) -> int {
+    if (x > y) {
+        x  // implicit return in if branch
+    } else {
+        y  // implicit return in else branch
+    }
+}
+
+fn main() -> int {
+    let a: int = traditional(5);
+    let b: int = implicit(5);
+    let c: int = shorthand();
+    let d: int = expressionBased(10, 20);
+    
+    println(a);
+    println(b);
+    println(c);
+    println(d);
+    
+    return 0;
+}

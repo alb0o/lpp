@@ -1,0 +1,194 @@
+#pragma paradigm hybrid
+
+// ===============================================
+// CREATIONAL PATTERNS (5)
+// ===============================================
+
+// 1. Singleton Pattern - Ensures only one instance exists
+autopattern Singleton ConfigManager;
+
+// 2. Factory Pattern - Creates objects without specifying exact class
+autopattern Factory ShapeFactory;
+
+// 3. Abstract Factory Pattern - Creates families of related objects
+autopattern AbstractFactory UIComponentFactory;
+
+// 4. Builder Pattern - Constructs complex objects step by step
+autopattern Builder DocumentBuilder;
+
+// 5. Prototype Pattern - Creates objects by cloning existing ones
+autopattern Prototype ShapePrototype;
+
+
+// ===============================================
+// STRUCTURAL PATTERNS (7)
+// ===============================================
+
+// 6. Adapter Pattern - Converts interface of class to another interface
+autopattern Adapter LegacySystemAdapter;
+
+// 7. Bridge Pattern - Decouples abstraction from implementation
+autopattern Bridge DrawingAPI;
+
+// 8. Composite Pattern - Composes objects into tree structures
+autopattern Composite FileSystemNode;
+
+// 9. Decorator Pattern - Adds responsibilities to objects dynamically
+autopattern Decorator TextDecorator;
+
+// 10. Facade Pattern - Provides unified interface to subsystems
+autopattern Facade MultimediaSystemFacade;
+
+// 11. Flyweight Pattern - Shares common state between objects
+autopattern Flyweight CharacterFactory;
+
+// 12. Proxy Pattern - Provides surrogate for another object
+autopattern Proxy ImageProxy;
+
+
+// ===============================================
+// BEHAVIORAL PATTERNS (11)
+// ===============================================
+
+// 13. Chain of Responsibility - Passes requests along chain of handlers
+autopattern Chain ErrorHandler;
+
+// 14. Command Pattern - Encapsulates requests as objects
+autopattern Command RemoteControl;
+
+// 15. Iterator Pattern - Sequentially accesses elements of collection
+autopattern Iterator ListIterator;
+
+// 16. Mediator Pattern - Reduces coupling between communicating objects
+autopattern Mediator ChatRoom;
+
+// 17. Memento Pattern - Captures and restores object state
+autopattern Memento EditorStateManager;
+
+// 18. Observer Pattern - Notifies multiple objects of state changes
+autopattern Observer NewsPublisher;
+
+// 19. State Pattern - Alters behavior when internal state changes
+autopattern State ConnectionState;
+
+// 20. Strategy Pattern - Defines family of interchangeable algorithms
+autopattern Strategy SortStrategy;
+
+// 21. Template Method Pattern - Defines skeleton of algorithm
+autopattern Template DataProcessor;
+
+// 22. Visitor Pattern - Adds operations to objects without modifying them
+autopattern Visitor ShapeVisitor;
+
+// 23. Interpreter Pattern - Interprets sentences in a language
+autopattern Interpreter ExpressionInterpreter;
+
+
+// ===============================================
+// TEST DEMONSTRATION
+// ===============================================
+
+function main() -> int {
+    // Test Singleton pattern
+    let config = ConfigManager::getInstance();
+    
+    // Test Factory pattern
+    let factory = ShapeFactory::create("Circle");
+    
+    // Test Observer pattern
+    let publisher = NewsPublisher();
+    publisher.attach(observer);
+    publisher.notify();
+    
+    // Test Strategy pattern
+    let sorter = SortStrategy();
+    sorter.execute();
+    
+    // Test Builder pattern
+    let builder = DocumentBuilder();
+    builder.buildPartA();
+    let document = builder.getResult();
+    
+    // Test Composite pattern
+    let root = FileSystemNode();
+    root.add(childNode);
+    root.operation();
+    
+    // Test Proxy pattern
+    let proxy = ImageProxy();
+    proxy.request();
+    
+    // Test Command pattern
+    let remote = RemoteControl();
+    remote.execute();
+    remote.undo();
+    
+    // Test Iterator pattern
+    let iterator = ListIterator();
+    while (iterator.hasNext()) {
+        let item = iterator.next();
+    }
+    
+    // Test State pattern
+    let connection = ConnectionState();
+    connection.handle();
+    connection.setState(newState);
+    
+    // Test Memento pattern
+    let editor = EditorStateManager();
+    let savedState = editor.save();
+    editor.restore(savedState);
+    
+    // Test Visitor pattern
+    let visitor = ShapeVisitor();
+    visitor.visit(element);
+    
+    // Test Template Method pattern
+    let processor = DataProcessor();
+    processor.templateMethod();
+    processor.step1();
+    processor.step2();
+    
+    // Test Mediator pattern
+    let chatroom = ChatRoom();
+    chatroom.notify(sender, event);
+    
+    // Test Chain of Responsibility pattern
+    let handler = ErrorHandler();
+    handler.handleRequest(request);
+    
+    // Test Decorator pattern
+    let decorator = TextDecorator();
+    decorator.operation();
+    
+    // Test Flyweight pattern
+    let charFactory = CharacterFactory();
+    charFactory.operation(extrinsicState);
+    
+    // Test Facade pattern
+    let multimedia = MultimediaSystemFacade();
+    multimedia.operation();
+    
+    // Test Bridge pattern
+    let drawing = DrawingAPI();
+    drawing.operation();
+    
+    // Test Adapter pattern
+    let adapter = LegacySystemAdapter();
+    adapter.operation();
+    
+    // Test Prototype pattern
+    let prototype = ShapePrototype();
+    let cloned = prototype.clone();
+    
+    // Test Abstract Factory pattern
+    let uiFactory = UIComponentFactory();
+    let buttonA = uiFactory.createProductA();
+    let buttonB = uiFactory.createProductB();
+    
+    // Test Interpreter pattern
+    let interpreter = ExpressionInterpreter();
+    interpreter.interpret();
+    
+    return 0;
+}

@@ -1,0 +1,17 @@
+#pragma paradigm hybrid
+
+// Test import/export (syntax only - C++ will use #include)
+
+import "math_utils"
+import { sqrt, pow } from "advanced_math"
+
+fn calculate(x: int) -> int {
+    return x * x;
+}
+
+fn main() -> void {
+    let result = calculate(5);
+    print("Calculation result:");
+    
+    print("Import/export syntax test completed!");
+}

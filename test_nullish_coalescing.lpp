@@ -1,0 +1,7 @@
+#pragma paradigm hybrid
+
+fn test() -> int {
+    let x: int? = 0;
+    let y: int = x ?? 42;
+    return y;
+}

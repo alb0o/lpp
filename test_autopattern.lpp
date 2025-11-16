@@ -1,0 +1,16 @@
+#pragma paradigm oop
+
+// Test autopattern - genera automaticamente il design pattern appropriato
+
+// Singleton per configuration
+autopattern Configuration AppConfig;
+
+// Factory per creazione oggetti
+autopattern CreateUser UserFactory;
+
+// Observer per eventi
+autopattern NotifyChanges EventManager;
+
+fn main() -> void {
+    print("Autopattern generates design patterns!");
+}

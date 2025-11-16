@@ -1,0 +1,13 @@
+#pragma paradigm functional
+
+fn test(x: int) -> int {
+    if (x < 0) {
+        return 0;
+    }
+    return 1;
+}
+
+fn main() -> void {
+    let result = test(8);
+    print("Works!");
+}

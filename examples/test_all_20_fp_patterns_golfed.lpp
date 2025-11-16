@@ -1,0 +1,191 @@
+#pragma paradigm hybrid
+
+// ===============================================
+// FP PATTERNS - GOLFED VERSION (20)
+// ===============================================
+// Ultra-compact functional pattern names!
+// ===============================================
+
+// MONADIC (5)
+autopattern Monad M;           // Monad
+autopattern Functor F;         // Functor
+autopattern Applicative A;     // Applicative
+autopattern Maybe O;           // Maybe/Option
+autopattern Either E;          // Either
+
+// STRUCTURAL FP (5)
+autopattern Monoid Mo;         // Monoid
+autopattern Foldable Fo;       // Foldable
+autopattern Traversable T;     // Traversable
+autopattern Lens L;            // Lens
+autopattern Zipper Z;          // Zipper
+
+// MONAD TRANSFORMERS (5)
+autopattern StateMonad S;      // StateMonad
+autopattern Reader R;          // Reader
+autopattern Writer W;          // Writer
+autopattern IO I;              // IO
+autopattern Continuation C;    // Continuation
+
+// ADVANCED FP (5)
+autopattern Free Fr;           // Free
+autopattern Comonad Co;        // Comonad
+autopattern Church Ch;         // Church
+autopattern AlgebraicEffect Ae; // AlgebraicEffect
+autopattern Morphism Mm;       // Morphism
+
+
+// ===============================================
+// GOLFED TEST FUNCTIONS
+// ===============================================
+
+fn tm() -> i {  // testMonadic
+    let m = M();
+    let b = m.bind(f);
+    let p = M::pure(42);
+    
+    let fu = F();
+    let mp = fu.map(x => x * 2);
+    
+    let a = A();
+    let ap = a.apply(fw);
+    
+    let o = O::just(100);
+    let n = O::nothing();
+    let v = o.getOrElse(0);
+    
+    let e = E::right("ok");
+    let l = E::left("err");
+    let fd = e.fold(ol, or);
+    
+    <- 0;
+}
+
+fn ts() -> i {  // testStructural
+    let m1 = Mo();
+    let m2 = Mo();
+    let cm = m1.combine(m2);
+    let em = Mo::empty();
+    
+    let tr = Fo();
+    let sm = tr.foldLeft(0, (a, x) => a + x);
+    let pr = tr.foldRight(1, (x, a) => x * a);
+    
+    let tv = T();
+    let tr = tv.traverse(f);
+    let sq = tv.sequence();
+    
+    let l = L();
+    let vw = l.view(p);
+    let st = l.set(p, nv);
+    let ov = l.over(p, f);
+    
+    let z = Z();
+    let ml = z.moveLeft();
+    let mr = z.moveRight();
+    let up = z.update(f);
+    
+    <- 0;
+}
+
+fn tt() -> i {  // testTransformers
+    let s = S();
+    let ns = s.bind(f);
+    let cs = S::get();
+    let ps = S::put(u);
+    
+    let r = R();
+    let as = R::ask();
+    let lc = r.local(f);
+    
+    let w = W();
+    let tl = W::tell("msg");
+    let ls = w.listen();
+    
+    let io = I();
+    let ex = io.unsafePerformIO();
+    let ch = io.bind(f);
+    
+    let c = C();
+    let cc = c.callCC(f);
+    let ct = c.bind(nc);
+    
+    <- 0;
+}
+
+fn ta() -> i {  // testAdvanced
+    let pr = Fr::pure(v);
+    let im = Fr::impure(ef);
+    let in = pr.interpret(it);
+    
+    let co = Co();
+    let ex = co.extract();
+    let et = co.extend(f);
+    let dp = co.duplicate();
+    
+    let ch = Ch::encode(v);
+    let dc = ch.fold(ov, oe);
+    
+    let ae = Ae();
+    let pf = ae.perform(e);
+    let hd = ae.handle(h);
+    
+    let ct = Mm::cata(a, s);
+    let an = Mm::ana(ca, sd);
+    let hy = Mm::hylo(a, ca, sd);
+    
+    <- 0;
+}
+
+// Composition examples (ultra-compact!)
+fn cf() -> F {  // composeFunctors
+    let f = F();
+    let r = f.map(x => x * 2).map(x => x + 1).map(x => x.toString());
+    <- r;
+}
+
+fn cm() -> M {  // composeMonads
+    let m = M::pure(10);
+    let r = m.bind(x => M::pure(x * 2)).bind(x => M::pure(x + 5)).bind(x => M::pure(x / 3));
+    <- r;
+}
+
+fn he() -> E {  // handleErrors
+    let c = E::right(42);
+    let r = c.fold(e => { print("Err: " + e); <- 0; }, s => { print("Ok: " + s.toString()); <- s; });
+    <- c;
+}
+
+fn lc() -> Person {  // lensComposition
+    let pl = L();
+    let al = L();
+    let p = Person { name: "A", address: Address { street: "M" } };
+    let u = pl.compose(al).set(p, "N");
+    <- u;
+}
+
+fn te() -> A<List<int>> {  // traverseEffects
+    let l = T();
+    let r = l.traverse(x => A::pure(x * 2));
+    <- r;
+}
+
+// Main (ultra-compact!)
+fn m() -> i {
+    print("FP Patterns - Golfed");
+    
+    tm();  // Test monadic
+    ts();  // Test structural
+    tt();  // Test transformers
+    ta();  // Test advanced
+    
+    cf();  // Compose functors
+    cm();  // Compose monads
+    he();  // Handle errors
+    lc();  // Lens compose
+    te();  // Traverse effects
+    
+    print("20 FP patterns OK!");
+    
+    <- 0;
+}

@@ -1,0 +1,28 @@
+#pragma paradigm oop
+
+// OOP MODE TEST - Classes and encapsulation
+
+class Counter {
+    let value: int;
+    
+    fn increment() -> void {
+        value = value + 1;
+    }
+    
+    fn getValue() -> int {
+        return value;
+    }
+}
+
+class Calculator {
+    fn add(a: int, b: int) -> int {
+        return a + b;
+    }
+    
+    fn multiply(x: int, y: int) -> int {
+        return x * y;
+    }
+}
+
+// Pattern-based class
+autopattern Factory NumberFactory;

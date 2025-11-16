@@ -11,6 +11,7 @@ namespace lpp
     void IdentifierExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void BinaryExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void UnaryExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void PostfixExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void CallExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void LambdaExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void TernaryIfExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
@@ -29,6 +30,12 @@ namespace lpp
     void IndexExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void ObjectExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void MatchExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void CastExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void AwaitExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void ThrowExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void YieldExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void TypeOfExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void InstanceOfExpr::accept(ASTVisitor &visitor) { visitor.visit(*this); }
 
     // Statement implementations
     void VarDecl::accept(ASTVisitor &visitor) { visitor.visit(*this); }
@@ -36,9 +43,18 @@ namespace lpp
     void IfStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void WhileStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void SwitchStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void ForStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void ForInStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void DoWhileStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void TryCatchStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void DestructuringStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void EnumDecl::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void BreakStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void ContinueStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void ReturnStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void ImportStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void ExportStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
+    void AutoPatternStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
     void ExprStmt::accept(ASTVisitor &visitor) { visitor.visit(*this); }
 
     // Function, Class, and Program implementations

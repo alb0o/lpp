@@ -1,0 +1,28 @@
+#pragma paradigm functional
+
+// Test pipe operator |>
+
+fn double(x: int) -> int {
+    return x * 2;
+}
+
+fn addTen(x: int) -> int {
+    return x + 10;
+}
+
+fn square(x: int) -> int {
+    return x * x;
+}
+
+fn main() -> void {
+    // Pipeline: 5 |> double |> addTen |> square
+    let result = 5 |> double |> addTen |> square;
+    
+    print("Pipeline result:");
+    
+    // Another pipeline
+    let value = 3 |> double |> square;
+    print("Value:");
+    
+    print("Pipe operator test completed!");
+}

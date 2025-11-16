@@ -4,26 +4,55 @@
 
 **A statically-typed systems language with modern syntax that transpiles to C++**
 
-[Documentation](docs/) • [Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/FULL_SPEC.md) • [Examples](examples/)
+**🎉 NOW WITH ALL 23 GANG OF FOUR DESIGN PATTERNS! 🎉**
+
+[Documentation](docs/) • [Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/FULL_SPEC.md) • [Examples](examples/) • [**Pattern Catalog**](docs/COMPLETE_PATTERN_CATALOG.md)
 
 </div>
 
 ---
 
-## ✨ Features
+## 🏆 **NEW: Automatic Design Pattern Generation**
+
+L++ introduces the revolutionary `autopattern` keyword that intelligently generates complete implementations of all 23 Gang of Four design patterns!
+
+```lpp
+// ONE LINE = COMPLETE PATTERN IMPLEMENTATION!
+autopattern Singleton ConfigManager;
+autopattern Factory ShapeFactory;
+autopattern Observer EventBus;
+```
+
+**✨ Features:**
+- 🎯 **Intelligent Detection** — Keyword-based pattern recognition
+- 🚀 **Zero Boilerplate** — Complete pattern in one line
+- 📚 **All 23 GoF Patterns** — Creational, Structural, Behavioral
+- 🔧 **Smart Defaults** — Pattern-specific methods and properties
+- 💡 **Type Safe** — Full C++ type system integration
+
+[**→ See Complete Pattern Catalog**](docs/COMPLETE_PATTERN_CATALOG.md)
+
+---
+
+## ✨ Core Features
 
 ### Language Features
 - 🎯 **Modern Syntax** — Rust/JS-inspired (arrow functions, destructuring, spread)
+- 🎨 **Multi-Paradigm** — HYBRID, FUNCTIONAL, IMPERATIVE, OOP, GOLFED (5 paradigms!)
 - 📦 **ES6+ Support** — Optional chaining (`?.`), nullish coalescing (`??`), template literals
 - ⚡ **Golf-Style Operators** — Symbolic functional programming (`~`, `@`, `?`, `\`)
 - 🔁 **Iterate-While** — Haskell-inspired sequence generation (`!!<`, `!!>`, `!! $`, `~>`)
-- 🎭 **Paradigm Enforcement** — Per-file paradigm declaration (`functional`, `oop`, `imperative`, `hybrid`)
+- 🎭 **Paradigm Enforcement** — Per-file paradigm declaration with validation
 - 🔧 **Pattern Matching** — `match` expressions with guards
 - 🧩 **ADTs** — Algebraic data types and type unions
 - 🎨 **Higher-Order Functions** — Map, filter, compose, pipeline operator
 - 🔗 **Interfaces & Traits** — Protocol-oriented programming
 - 📝 **List Comprehensions** — Python-style syntax
 - 🌊 **Lambda Expressions** — Closures with capture
+- 🎁 **Generators** — `yield` keyword for lazy evaluation
+- 🔍 **Type Guards** — `typeof`, `instanceof` operators
+- 📊 **Getters/Setters** — Property accessors with `get`/`set`
+- ⬅️ **Arrow-Left Returns** — Alternative return syntax (`<-`)
 
 ### Static Analysis
 - 🛡️ **Path-Sensitive Analysis** — CFG + data-flow tracking

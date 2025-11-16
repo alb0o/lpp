@@ -1,0 +1,21 @@
+#pragma paradigm hybrid
+
+// Test classic for loop with i++
+
+fn testClassicForLoop() -> void {
+    // Classic for loop with i++
+    for (let i = 0; i < 10; i++) {
+        print("Iteration with i++");
+    }
+    
+    // Classic for loop with ++i
+    for (let j = 0; j < 5; ++j) {
+        print("Iteration with ++j");
+    }
+    
+    print("Classic for loops completed!");
+}
+
+fn main() -> void {
+    testClassicForLoop();
+}

@@ -1,0 +1,34 @@
+#pragma paradigm golfed
+
+// GOLFED MODE: Sintassi minimale, codice compatto
+
+// Test sintassi alternativa return con <-
+fn add(a: int, b: int) -> int {
+    <- a + b;
+}
+
+fn mul(x: int, y: int) -> int {
+    <- x * y;
+}
+
+// Test implicit return (già funzionante)
+fn sub(a: int, b: int) -> int {
+    a - b;
+}
+
+// Test golfed - loop compatto
+fn sum(n: int) -> int {
+    let t = 0;
+    for (let i = 0; i < n; i++) {
+        t += i;
+    }
+    <- t;
+}
+
+fn main() -> void {
+    let x = add(5, 3);
+    let y = mul(4, 7);
+    let z = sub(10, 2);
+    let s = sum(10);
+    print("Golfed mode works!");
+}

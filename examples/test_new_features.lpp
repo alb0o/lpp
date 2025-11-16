@@ -1,0 +1,77 @@
+#pragma paradigm hybrid
+
+// Test for NEW features: for loops, cast, enums, try-catch, do-while
+
+// ENUM declaration
+enum Status {
+    Pending = 0,
+    Running = 1,
+    Complete = 2,
+    Failed = 3
+}
+
+// Function with for loop
+fn testForLoop() -> void {
+    // Classic for loop
+    for (let i: int = 0; i < 10; i = i + 1) {
+        println(i);
+    }
+    
+    return;
+}
+
+// Function with for-in loop
+fn testForIn() -> void {
+    let numbers = [1, 2, 3, 4, 5];
+    
+    // For-in loop
+    for (let num in numbers) {
+        println(num);
+    }
+    
+    return;
+}
+
+// Function with do-while
+fn testDoWhile() -> void {
+    let mut counter: int = 0;
+    
+    do {
+        println(counter);
+        counter = counter + 1;
+    } while (counter < 5);
+    
+    return;
+}
+
+// Function with try-catch
+fn testTryCatch() -> void {
+    try {
+        let risky: int = 42;
+        println(risky);
+    } catch (e) {
+        println("Error caught!");
+    }
+    
+    return;
+}
+
+// Function with cast
+fn testCast() -> int {
+    let x: float = 3.14;
+    let y: int = x as int;  // Cast expression
+    return y;
+}
+
+// Main function
+fn main() -> int {
+    testForLoop();
+    testForIn();
+    testDoWhile();
+    testTryCatch();
+    
+    let result: int = testCast();
+    println(result);
+    
+    return 0;
+}

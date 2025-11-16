@@ -1,0 +1,22 @@
+#pragma paradigm hybrid
+
+// Test async/await
+
+async fn fetchData() -> string {
+    return "Data from server";
+}
+
+async fn processNumber(x: int) -> int {
+    return x * 2;
+}
+
+fn main() -> void {
+    // Call async functions and await results
+    let data = await fetchData();
+    print(data);
+    
+    let result = await processNumber(21);
+    print("Result:");
+    
+    print("Async/await test completed!");
+}

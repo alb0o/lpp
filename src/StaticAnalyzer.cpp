@@ -10,6 +10,10 @@ namespace lpp
     std::vector<AnalysisIssue> StaticAnalyzer::analyze(Program &program)
     {
         issues.clear();
+
+        // Set current paradigm from program
+        currentParadigm = program.paradigm;
+
         program.accept(*this);
 
         // Run global analyses
@@ -367,8 +371,33 @@ namespace lpp
         node.operand->accept(*this);
     }
 
+    void StaticAnalyzer::visit(PostfixExpr &node)
+    {
+        node.operand->accept(*this);
+    }
+
     void StaticAnalyzer::visit(CallExpr &node)
     {
+        // FUNCTIONAL paradigm: warn on potentially impure functions
+        if (currentParadigm == ParadigmMode::FUNCTIONAL)
+        {
+            // Common impure function names
+            std::vector<std::string> impureFunctions = {"print", "println", "console.log", "write", "read", "input", "random"};
+
+            for (const auto &impure : impureFunctions)
+            {
+                if (node.function == impure)
+                {
+                    reportIssue(
+                        IssueType::PARADIGM_MUTATION_IN_FUNCTIONAL,
+                        Severity::WARNING,
+                        "Function '" + impure + "' has side effects. Functional paradigm encourages pure functions.",
+                        {"Consider isolating side effects at program boundaries."});
+                    break;
+                }
+            }
+        }
+
         for (auto &arg : node.arguments)
         {
             arg->accept(*this);
@@ -631,6 +660,27 @@ namespace lpp
         }
     }
 
+    void StaticAnalyzer::visit(ImportStmt &node)
+    {
+        currentLine++;
+        // No analysis needed for imports
+    }
+
+    void StaticAnalyzer::visit(ExportStmt &node)
+    {
+        currentLine++;
+        if (node.declaration)
+        {
+            node.declaration->accept(*this);
+        }
+    }
+
+    void StaticAnalyzer::visit(AutoPatternStmt &node)
+    {
+        currentLine++;
+        // AutoPattern is expanded during parsing, no analysis needed here
+    }
+
     void StaticAnalyzer::visit(ExprStmt &node)
     {
         currentLine++;
@@ -641,6 +691,9 @@ namespace lpp
     {
         currentFunction = node.name;
         symbolTable.clear();
+
+        // Check paradigm violations
+        checkParadigmViolation(node);
 
         // Initialize parameters as initialized
         for (auto &[paramName, paramType] : node.parameters)
@@ -707,6 +760,19 @@ namespace lpp
                     Severity::ERROR,
                     "Mutable variables are not allowed in 'functional' paradigm. Use 'let' or 'const' instead.",
                     {"Functional paradigm enforces immutability for predictable behavior."});
+            }
+        }
+
+        // GOLFED paradigm: encourage short variable names
+        if (currentParadigm == ParadigmMode::GOLFED)
+        {
+            if (node.name.length() > 3)
+            {
+                reportIssue(
+                    IssueType::PARADIGM_GOLF_ENCOURAGED,
+                    Severity::WARNING,
+                    "GOLFED paradigm: Consider shorter variable name '" + node.name + "' for minimal code.",
+                    {"Golfed mode favors 1-2 character names: x, y, n, i, j, etc."});
             }
         }
     }
@@ -782,6 +848,185 @@ namespace lpp
                 "Golf-style operator '\\\\' is discouraged in 'imperative' paradigm. Consider explicit loops.",
                 {"Imperative paradigm favors explicit control flow for clarity."});
         }
+    }
+
+    // GOLFED paradigm validations - encourage ultra-short syntax
+    void StaticAnalyzer::checkParadigmViolation(Function &node)
+    {
+        if (currentParadigm == ParadigmMode::GOLFED)
+        {
+            // Encourage short function names
+            if (node.name.length() > 5)
+            {
+                reportIssue(
+                    IssueType::PARADIGM_GOLF_ENCOURAGED,
+                    Severity::WARNING,
+                    "GOLFED paradigm: Consider shorter function name '" + node.name + "' for minimal code.",
+                    {"Golfed mode favors 1-3 character names: f, g, h, fn, etc."});
+            }
+        }
+
+        // OOP paradigm: discourage standalone functions
+        if (currentParadigm == ParadigmMode::OOP)
+        {
+            // Check if function is not a method (not inside a class)
+            // For now we assume standalone functions - in a full impl we'd track context
+            if (!node.name.empty()) // Placeholder - in full impl check if not a method
+            {
+                reportIssue(
+                    IssueType::PARADIGM_GOLF_DISCOURAGED,
+                    Severity::WARNING,
+                    "OOP paradigm: Consider organizing function '" + node.name + "' as a class method.",
+                    {"Object-oriented paradigm favors encapsulating behavior in classes."});
+            }
+        }
+    }
+
+    // NEW IMPLEMENTATIONS - Stub methods for new AST nodes
+    void StaticAnalyzer::visit(CastExpr &node)
+    {
+        node.expression->accept(*this);
+    }
+
+    void StaticAnalyzer::visit(AwaitExpr &node)
+    {
+        node.expression->accept(*this);
+    }
+
+    void StaticAnalyzer::visit(ThrowExpr &node)
+    {
+        node.expression->accept(*this);
+    }
+
+    void StaticAnalyzer::visit(YieldExpr &node)
+    {
+        if (node.value)
+        {
+            node.value->accept(*this);
+        }
+    }
+
+    void StaticAnalyzer::visit(TypeOfExpr &node)
+    {
+        if (node.expr)
+        {
+            node.expr->accept(*this);
+        }
+    }
+
+    void StaticAnalyzer::visit(InstanceOfExpr &node)
+    {
+        if (node.expr)
+        {
+            node.expr->accept(*this);
+        }
+    }
+
+    void StaticAnalyzer::visit(ForStmt &node)
+    {
+        loopDepth++;
+
+        if (node.initializer)
+        {
+            node.initializer->accept(*this);
+        }
+
+        if (node.condition)
+        {
+            node.condition->accept(*this);
+        }
+
+        if (node.increment)
+        {
+            node.increment->accept(*this);
+        }
+
+        for (auto &stmt : node.body)
+        {
+            stmt->accept(*this);
+        }
+
+        loopDepth--;
+    }
+
+    void StaticAnalyzer::visit(ForInStmt &node)
+    {
+        loopDepth++;
+
+        node.iterable->accept(*this);
+
+        // Register the loop variable
+        SymbolicValue val;
+        val.state = SymbolicValue::State::INITIALIZED;
+        symbolTable[node.variable] = val;
+
+        for (auto &stmt : node.body)
+        {
+            stmt->accept(*this);
+        }
+
+        loopDepth--;
+    }
+
+    void StaticAnalyzer::visit(DoWhileStmt &node)
+    {
+        loopDepth++;
+
+        for (auto &stmt : node.body)
+        {
+            stmt->accept(*this);
+        }
+
+        node.condition->accept(*this);
+
+        loopDepth--;
+    }
+
+    void StaticAnalyzer::visit(TryCatchStmt &node)
+    {
+        // Analyze try block
+        for (auto &stmt : node.tryBlock)
+        {
+            stmt->accept(*this);
+        }
+
+        // Register catch variable
+        if (!node.catchVariable.empty())
+        {
+            SymbolicValue val;
+            val.state = SymbolicValue::State::INITIALIZED;
+            symbolTable[node.catchVariable] = val;
+        }
+
+        // Analyze catch block
+        for (auto &stmt : node.catchBlock)
+        {
+            stmt->accept(*this);
+        }
+
+        // Analyze finally block
+        for (auto &stmt : node.finallyBlock)
+        {
+            stmt->accept(*this);
+        }
+    }
+
+    void StaticAnalyzer::visit(DestructuringStmt &node)
+    {
+        node.source->accept(*this);
+
+        // Register all target variables as initialized
+        for (const auto &target : node.targets)
+        {
+            SymbolicValue val;
+            val.state = SymbolicValue::State::INITIALIZED;
+            symbolTable[target] = val;
+        }
+    }
+
+    void StaticAnalyzer::visit(EnumDecl &node)
+    {
+        // Nothing to analyze for enum declarations
     }
 
 } // namespace lpp

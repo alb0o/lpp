@@ -1,0 +1,13 @@
+#pragma paradigm functional
+
+fn complex(x: int) -> int {
+    if (x < 0) {
+        return 0;
+    }
+    x * 2;
+}
+
+fn main() -> void {
+    let result = complex(8);
+    print("Works!");
+}

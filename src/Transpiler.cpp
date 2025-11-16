@@ -15,10 +15,13 @@ namespace lpp
         writeLine("#include <string>");
         writeLine("#include <cmath>");
         writeLine("#include <vector>");
+        writeLine("#include <array>");
+        writeLine("#include <optional>");
         writeLine("#include <functional>");
         writeLine("#include <variant>");
         writeLine("#include <map>");
         writeLine("#include <any>");
+        writeLine("#include <future>");
         writeLine("");
 
         // Helper function for print
@@ -159,8 +162,23 @@ namespace lpp
 
     void Transpiler::visit(UnaryExpr &node)
     {
-        output << mapOperator(node.op);
+        // Handle prefix ++/-- operators
+        if (node.op == "++" || node.op == "--")
+        {
+            output << node.op;
+            node.operand->accept(*this);
+        }
+        else
+        {
+            output << mapOperator(node.op);
+            node.operand->accept(*this);
+        }
+    }
+
+    void Transpiler::visit(PostfixExpr &node)
+    {
         node.operand->accept(*this);
+        output << node.op; // ++ or --
     }
 
     void Transpiler::visit(CallExpr &node)
@@ -546,7 +564,46 @@ namespace lpp
     void Transpiler::visit(VarDecl &node)
     {
         indent();
-        output << mapType(node.type) << " " << node.name;
+
+        // Handle different type annotations
+        std::string cppType;
+
+        if (!node.unionTypes.empty())
+        {
+            // Union type: int | string -> std::variant<int, std::string>
+            output << "std::variant<";
+            for (size_t i = 0; i < node.unionTypes.size(); i++)
+            {
+                output << mapType(node.unionTypes[i]);
+                if (i < node.unionTypes.size() - 1)
+                    output << ", ";
+            }
+            output << "> " << node.name;
+        }
+        else if (node.isArrayType)
+        {
+            if (node.arraySize > 0)
+            {
+                // Fixed-size array: int[10] -> std::array<int, 10>
+                output << "std::array<" << mapType(node.type) << ", " << node.arraySize << "> " << node.name;
+            }
+            else
+            {
+                // Dynamic array: int[] -> std::vector<int>
+                output << "std::vector<" << mapType(node.type) << "> " << node.name;
+            }
+        }
+        else if (node.isNullable)
+        {
+            // Nullable: int? -> std::optional<int>
+            output << "std::optional<" << mapType(node.type) << "> " << node.name;
+        }
+        else
+        {
+            // Regular type
+            output << mapType(node.type) << " " << node.name;
+        }
+
         if (node.initializer)
         {
             output << " = ";
@@ -671,6 +728,31 @@ namespace lpp
         output << ";\n";
     }
 
+    void Transpiler::visit(ImportStmt &node)
+    {
+        // Transpile to C++ #include
+        indent();
+        output << "#include \"" << node.module << ".hpp\"\n";
+    }
+
+    void Transpiler::visit(ExportStmt &node)
+    {
+        // In C++, exports are handled by header files
+        // Just transpile the declaration normally
+        if (node.declaration)
+        {
+            node.declaration->accept(*this);
+        }
+    }
+
+    void Transpiler::visit(AutoPatternStmt &node)
+    {
+        // AutoPattern is expanded during parsing into ClassDecl
+        // This should not be reached during transpilation
+        // but included for completeness
+        output << "// Auto-generated pattern: " << node.patternType << " for " << node.className << "\n";
+    }
+
     void Transpiler::visit(ExprStmt &node)
     {
         indent();
@@ -680,9 +762,34 @@ namespace lpp
 
     void Transpiler::visit(Function &node)
     {
+        // Generate template for generics
+        if (!node.genericParams.empty())
+        {
+            indent();
+            output << "template<";
+            for (size_t i = 0; i < node.genericParams.size(); i++)
+            {
+                output << "typename " << node.genericParams[i];
+                if (i < node.genericParams.size() - 1)
+                {
+                    output << ", ";
+                }
+            }
+            output << ">\n";
+        }
+
         // Function signature with proper indentation
         indent();
-        output << mapType(node.returnType) << " " << node.name << "(";
+
+        // Handle async functions - wrap return type in std::future
+        if (node.isAsync)
+        {
+            output << "std::future<" << mapType(node.returnType) << "> " << node.name << "(";
+        }
+        else
+        {
+            output << mapType(node.returnType) << " " << node.name << "(";
+        }
 
         for (size_t i = 0; i < node.parameters.size(); i++)
         {
@@ -706,10 +813,27 @@ namespace lpp
         output << ") {\n";
 
         indentLevel++;
+
+        // For async functions, wrap body in std::async
+        if (node.isAsync)
+        {
+            indent();
+            output << "return std::async(std::launch::async, [=]() {\n";
+            indentLevel++;
+        }
+
         for (auto &stmt : node.body)
         {
             stmt->accept(*this);
         }
+
+        if (node.isAsync)
+        {
+            indentLevel--;
+            indent();
+            output << "});\n";
+        }
+
         indentLevel--;
 
         indent();
@@ -718,10 +842,23 @@ namespace lpp
 
     void Transpiler::visit(Program &node)
     {
-        // Type declarations first
+        // Imports first
+        for (auto &imp : node.imports)
+        {
+            imp->accept(*this);
+        }
+
+        // Type declarations
         for (auto &type : node.types)
         {
             type->accept(*this);
+            writeLine("");
+        }
+
+        // Enums
+        for (auto &enumDecl : node.enums)
+        {
+            enumDecl->accept(*this);
             writeLine("");
         }
 
@@ -870,6 +1007,32 @@ namespace lpp
     {
         // Class declaration
         writeLine("class " + node.name + (node.baseClass.empty() ? "" : " : public " + node.baseClass) + " {");
+
+        // If design pattern is specified, inject pattern code
+        if (!node.designPattern.empty())
+        {
+            writeLine("// AUTO-GENERATED: " + node.designPattern + " Pattern");
+            writeLine("#include \"lpp_patterns.hpp\"");
+
+            if (node.designPattern == "Singleton")
+            {
+                writeLine("LPP_PATTERN_SINGLETON(" + node.name + ")");
+            }
+            else if (node.designPattern == "Observer")
+            {
+                writeLine("LPP_PATTERN_OBSERVER(" + node.name + ")");
+            }
+            else if (node.designPattern == "Builder")
+            {
+                writeLine("LPP_PATTERN_BUILDER(" + node.name + ")");
+            }
+            else if (node.designPattern == "Command")
+            {
+                writeLine("LPP_PATTERN_COMMAND()");
+            }
+            // Add more patterns as needed
+        }
+
         writeLine("public:");
         indentLevel++;
 
@@ -970,6 +1133,246 @@ namespace lpp
         indentLevel--;
         writeLine(">;");
         writeLine("");
+    }
+
+    // NEW IMPLEMENTATIONS - Cast, Await, Throw
+    void Transpiler::visit(CastExpr &node)
+    {
+        output << "static_cast<" << mapType(node.targetType) << ">(";
+        node.expression->accept(*this);
+        output << ")";
+    }
+
+    void Transpiler::visit(AwaitExpr &node)
+    {
+        // C++20 co_await or .get() for std::future
+        output << "(";
+        node.expression->accept(*this);
+        output << ").get()"; // Assuming std::future
+    }
+
+    void Transpiler::visit(ThrowExpr &node)
+    {
+        indent();
+        output << "throw ";
+        node.expression->accept(*this);
+        output << ";\n";
+    }
+
+    void Transpiler::visit(YieldExpr &node)
+    {
+        output << "co_yield ";
+        if (node.value)
+        {
+            node.value->accept(*this);
+        }
+    }
+
+    void Transpiler::visit(TypeOfExpr &node)
+    {
+        output << "typeid(";
+        node.expr->accept(*this);
+        output << ").name()";
+    }
+
+    void Transpiler::visit(InstanceOfExpr &node)
+    {
+        output << "dynamic_cast<" << mapType(node.typeName) << "*>(";
+        node.expr->accept(*this);
+        output << ") != nullptr";
+    }
+
+    // NEW IMPLEMENTATIONS - For, ForIn, DoWhile
+    void Transpiler::visit(ForStmt &node)
+    {
+        indent();
+        output << "for (";
+
+        // Initializer
+        if (node.initializer)
+        {
+            // Inline the initialization without newline
+            if (auto *varDecl = dynamic_cast<VarDecl *>(node.initializer.get()))
+            {
+                output << mapType(varDecl->type) << " " << varDecl->name;
+                if (varDecl->initializer)
+                {
+                    output << " = ";
+                    varDecl->initializer->accept(*this);
+                }
+            }
+        }
+        output << "; ";
+
+        // Condition
+        if (node.condition)
+        {
+            node.condition->accept(*this);
+        }
+        output << "; ";
+
+        // Increment
+        if (node.increment)
+        {
+            node.increment->accept(*this);
+        }
+        output << ") {\n";
+
+        indentLevel++;
+        for (auto &stmt : node.body)
+        {
+            stmt->accept(*this);
+        }
+        indentLevel--;
+        indent();
+        output << "}\n";
+    }
+
+    void Transpiler::visit(ForInStmt &node)
+    {
+        indent();
+        output << "for (auto " << node.variable << " : ";
+        node.iterable->accept(*this);
+        output << ") {\n";
+
+        indentLevel++;
+        for (auto &stmt : node.body)
+        {
+            stmt->accept(*this);
+        }
+        indentLevel--;
+        indent();
+        output << "}\n";
+    }
+
+    void Transpiler::visit(DoWhileStmt &node)
+    {
+        indent();
+        output << "do {\n";
+
+        indentLevel++;
+        for (auto &stmt : node.body)
+        {
+            stmt->accept(*this);
+        }
+        indentLevel--;
+
+        indent();
+        output << "} while (";
+        node.condition->accept(*this);
+        output << ");\n";
+    }
+
+    // NEW IMPLEMENTATIONS - TryCatch
+    void Transpiler::visit(TryCatchStmt &node)
+    {
+        indent();
+        output << "try {\n";
+
+        indentLevel++;
+        for (auto &stmt : node.tryBlock)
+        {
+            stmt->accept(*this);
+        }
+        indentLevel--;
+
+        indent();
+        output << "} catch (";
+        if (!node.catchVariable.empty())
+        {
+            output << "const std::exception& " << node.catchVariable;
+        }
+        else
+        {
+            output << "...";
+        }
+        output << ") {\n";
+
+        indentLevel++;
+        for (auto &stmt : node.catchBlock)
+        {
+            stmt->accept(*this);
+        }
+        indentLevel--;
+
+        if (!node.finallyBlock.empty())
+        {
+            indent();
+            output << "}\n";
+            indent();
+            output << "// Finally block (executed via RAII)\n";
+            indent();
+            output << "{\n";
+            indentLevel++;
+            for (auto &stmt : node.finallyBlock)
+            {
+                stmt->accept(*this);
+            }
+            indentLevel--;
+        }
+
+        indent();
+        output << "}\n";
+    }
+
+    // NEW IMPLEMENTATIONS - Destructuring
+    void Transpiler::visit(DestructuringStmt &node)
+    {
+        if (node.isArray)
+        {
+            // Array destructuring: let [a, b, c] = arr
+            indent();
+            output << "auto __tmp = ";
+            node.source->accept(*this);
+            output << ";\n";
+
+            for (size_t i = 0; i < node.targets.size(); i++)
+            {
+                indent();
+                output << "auto " << node.targets[i] << " = __tmp[" << i << "];\n";
+            }
+        }
+        else
+        {
+            // Object destructuring: let {x, y} = obj
+            indent();
+            output << "auto __tmp = ";
+            node.source->accept(*this);
+            output << ";\n";
+
+            for (const auto &target : node.targets)
+            {
+                indent();
+                output << "auto " << target << " = __tmp[\"" << target << "\"];\n";
+            }
+        }
+    }
+
+    // NEW IMPLEMENTATIONS - Enum
+    void Transpiler::visit(EnumDecl &node)
+    {
+        indent();
+        output << "enum " << node.name << " {\n";
+        indentLevel++;
+
+        for (size_t i = 0; i < node.values.size(); i++)
+        {
+            indent();
+            output << node.values[i].first;
+            if (node.values[i].second >= 0)
+            {
+                output << " = " << node.values[i].second;
+            }
+            if (i < node.values.size() - 1)
+            {
+                output << ",";
+            }
+            output << "\n";
+        }
+
+        indentLevel--;
+        indent();
+        output << "};\n";
     }
 
 } // namespace lpp

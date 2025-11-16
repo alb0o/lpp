@@ -1,0 +1,58 @@
+#pragma paradigm hybrid
+
+// COMPREHENSIVE FEATURE TEST - All 5 Paradigms + Key Features
+
+// 1. GOLFED-style - ultra-compact code
+fn s(x: int) -> int { <- x * 2; }
+
+// 2. FUNCTIONAL-style - pure functions with implicit return
+fn add(a: int, b: int) -> int { a + b; }
+
+// 3. IMPERATIVE-style - explicit loops
+fn sumRange(n: int) -> int {
+    let result: int = 0;
+    let i: int = 1;
+    while (i <= n) {
+        result = result + i;
+        i++;
+    }
+    return result;
+}
+
+// 4. OOP-style - classes with methods
+class Calculator {
+    let value: int;
+    
+    fn getValue() -> int {
+        return value;
+    }
+}
+
+// 5. Generic functions
+fn identity<T>(x: T) -> T {
+    return x;
+}
+
+// 6. Async functions
+async fn fetchData() -> string {
+    return "data";
+}
+
+// 7. Pattern generation with autopattern
+autopattern Configuration AppConfig;
+
+// 8. Alternative return syntax with arrow-left
+fn doubled(x: int) -> int {
+    <- x * 2;
+}
+
+// 9. Null-coalescing operator
+fn getDefault(value: int) -> int {
+    let result: int = value ?? 42;
+    return result;
+}
+
+// 10. Implicit return (functional style)
+fn triple(n: int) -> int {
+    n * 3;
+}

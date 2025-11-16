@@ -1,0 +1,7 @@
+#pragma paradigm functional
+
+fn calculate(x: int) -> int {
+    let result: int = x * 2;
+    print(result);
+    return result;
+}

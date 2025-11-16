@@ -1,0 +1,15 @@
+#pragma paradigm functional
+
+fn add(a: int, b: int) -> int {
+    a + b;
+}
+
+fn multiply(x: int, y: int) -> int {
+    x * y;
+}
+
+fn main() -> void {
+    let sum = add(5, 3);
+    let product = multiply(4, 7);
+    print("Works!");
+}

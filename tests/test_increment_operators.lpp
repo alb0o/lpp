@@ -1,0 +1,36 @@
+#pragma paradigm hybrid
+
+// Test increment and decrement operators
+
+fn testIncrementDecrement() -> void {
+    let x = 5;
+    
+    // Postfix increment
+    let a = x++;
+    print("After x++:");
+    
+    // Postfix decrement
+    let b = x--;
+    print("After x--:");
+    
+    // Prefix increment
+    let c = ++x;
+    print("After ++x:");
+    
+    // Prefix decrement
+    let d = --x;
+    print("After --x:");
+    
+    // In loop
+    let i = 0;
+    while (i < 5) {
+        print("Loop iteration");
+        i++;
+    }
+    
+    print("Test completed!");
+}
+
+fn main() -> void {
+    testIncrementDecrement();
+}

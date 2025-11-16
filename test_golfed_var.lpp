@@ -1,0 +1,7 @@
+#pragma paradigm golfed
+
+fn test() -> int {
+    let longVariableName: int = 10;
+    let x: int = 5;
+    return longVariableName + x;
+}

@@ -1,0 +1,15 @@
+#pragma paradigm hybrid
+
+// Simplified test for new features
+
+fn testCast() -> int {
+    let x: float = 3.14;
+    let y: int = x as int;
+    return y;
+}
+
+fn main() -> int {
+    let result: int = testCast();
+    println(result);
+    return 0;
+}

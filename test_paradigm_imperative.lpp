@@ -1,0 +1,31 @@
+#pragma paradigm imperative
+
+// IMPERATIVE MODE TEST - Explicit control flow
+
+// Explicit loops with mutations
+fn factorial(n: int) -> int {
+    let result: int = 1;
+    let i: int = 1;
+    while (i <= n) {
+        result = result * i;
+        i = i + 1;
+    }
+    return result;
+}
+
+// Explicit conditionals
+fn abs(x: int) -> int {
+    if (x < 0) {
+        return x * -1;
+    } else {
+        return x;
+    }
+}
+
+// Step-by-step transformations
+fn processData(value: int) -> int {
+    let step1: int = value + 10;
+    let step2: int = step1 * 2;
+    let step3: int = step2 - 5;
+    return step3;
+}

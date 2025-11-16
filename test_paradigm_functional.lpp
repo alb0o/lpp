@@ -1,0 +1,17 @@
+#pragma paradigm functional
+
+// FUNCTIONAL MODE TEST - Pure functions, immutability
+
+// Pure function with implicit return
+fn add(x: int, y: int) -> int { x + y; }
+
+// Composition (no side effects)
+fn double(n: int) -> int { n * 2; }
+fn square(n: int) -> int { n * n; }
+
+// Chained transformations
+fn process(value: int) -> int {
+    let doubled: int = value * 2;
+    let squared: int = doubled * doubled;
+    return squared;
+}

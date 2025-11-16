@@ -1,0 +1,33 @@
+#pragma paradigm oop
+
+// Test class properties
+
+class Person {
+    let name: string;
+    let age: int;
+    const id: int;
+    
+    fn greet() -> void {
+        print("Hello from Person class!");
+    }
+    
+    fn getInfo() -> string {
+        return "Person info";
+    }
+}
+
+class Counter {
+    let count: int = 0;
+    
+    fn increment() -> void {
+        print("Incrementing counter");
+    }
+    
+    fn getValue() -> int {
+        return 42;
+    }
+}
+
+fn main() -> void {
+    print("Class properties test completed!");
+}

@@ -1,0 +1,56 @@
+#pragma paradigm oop
+
+// Test DESIGN PATTERN GENERATOR - Feature #101
+// Use @pattern to auto-generate common design patterns
+
+// Singleton pattern
+@pattern Singleton
+class Logger {
+    logLevel: int;
+    
+    fn log(message: string) -> void {
+        println(message);
+        return;
+    }
+}
+
+// Observer pattern
+@pattern Observer
+class EventManager {
+    eventName: string;
+    
+    fn trigger() -> void {
+        println("Event triggered");
+        // Auto-generated notify() method will call all observers
+        return;
+    }
+}
+
+// Builder pattern
+@pattern Builder
+class Configuration {
+    timeout: int;
+    maxRetries: int;
+    endpoint: string;
+}
+
+fn main() -> int {
+    // Singleton usage
+    let logger1: Logger = Logger::getInstance();
+    let logger2: Logger = Logger::getInstance();
+    // logger1 === logger2 (same instance)
+    
+    // Observer usage
+    let events: EventManager = EventManager();
+    // events.subscribe(callback) - auto-generated method
+    // events.notify() - auto-generated method
+    
+    // Builder usage
+    let config: Configuration = Configuration::Builder()
+        .setTimeout(5000)
+        .setMaxRetries(3)
+        .setEndpoint("api.example.com")
+        .build();
+    
+    return 0;
+}

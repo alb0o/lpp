@@ -1,0 +1,157 @@
+#pragma paradigm hybrid
+
+// ===== L++ FINAL FEATURE TEST =====
+
+// 1. Enums
+enum Status { PENDING, ACTIVE, DONE }
+
+// 2. Generic functions with explicit type parameters
+fn identity<T>(x: T) -> T {
+    x;
+}
+
+fn pair<T, U>(first: T, second: U) -> string {
+    "paired";
+}
+
+// 3. Implicit return (last expression becomes return)
+fn add(a: int, b: int) -> int {
+    a + b;
+}
+
+fn multiply(x: int, y: int) -> int {
+    x * y;
+}
+
+// 4. Compound assignments
+fn testCompound() -> int {
+    let x = 10;
+    x += 5;
+    x -= 2;
+    x *= 3;
+    x /= 2;
+    x;
+}
+
+// 5. Increment/Decrement operators
+fn testIncrement() -> int {
+    let a = 0;
+    a++;
+    ++a;
+    a--;
+    --a;
+    a;
+}
+
+// 6. Classic for loop with increment
+fn sumRange(n: int) -> int {
+    let total = 0;
+    for (let i = 0; i < n; i++) {
+        total += i;
+    }
+    total;
+}
+
+// 7. Ternary if expression
+fn max(a: int, b: int) -> int {
+    ?a > b -> a $ b;
+}
+
+// 8. Nullish coalescing
+fn getOrDefault(x: int) -> int {
+    x;
+}
+
+// 9. Pipe operator
+fn double(x: int) -> int { x * 2; }
+fn inc(x: int) -> int { x + 1; }
+
+fn pipeline() -> int {
+    5 |> double |> inc;
+}
+
+// 10. Type casting
+fn castTest() -> int {
+    let x = 3.14;
+    let y = x as int;
+    y;
+}
+
+// 11. Switch statement
+fn checkValue(x: int) -> string {
+    switch (x) {
+        case 1: return "one";
+        case 2: return "two";
+        default: return "other";
+    }
+}
+
+// 12. While loop
+fn countdown(n: int) -> int {
+    while (n > 0) {
+        n--;
+    }
+    n;
+}
+
+// 13. Do-while loop
+fn countup() -> int {
+    let n = 0;
+    do {
+        n++;
+    } while (n < 5);
+    n;
+}
+
+// 14. If-else with comparisons
+fn compare(a: int, b: int) -> string {
+    if (a > b) {
+        return "greater";
+    }
+    if (a < b) {
+        return "less";
+    }
+    "equal";
+}
+
+// 16. Async/await
+async fn fetchData() -> string {
+    let data = await loadAsync();
+    data;
+}
+
+async fn loadAsync() -> string {
+    "data";
+}
+
+// Main test function
+fn main() -> void {
+    // Test generics
+    let id = identity<int>(42);
+    let p = pair<int, string>(1, "one");
+    
+    // Test arithmetic
+    let sum = add(10, 5);
+    let prod = multiply(3, 7);
+    
+    // Test operators
+    let comp = testCompound();
+    let incr = testIncrement();
+    
+    // Test loops
+    let range = sumRange(10);
+    let down = countdown(5);
+    let up = countup();
+    
+    // Test conditionals
+    let maximum = max(10, 20);
+    let cmp = compare(5, 3);
+    let val = checkValue(2);
+    
+    // Test functional
+    let piped = pipeline();
+    let def = getOrDefault(42);
+    let casted = castTest();
+    
+    print("✅ All features tested successfully!");
+}

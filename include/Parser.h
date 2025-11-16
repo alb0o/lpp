@@ -36,15 +36,22 @@ namespace lpp
         std::unique_ptr<ClassDecl> classDeclaration();
         std::unique_ptr<InterfaceDecl> interfaceDeclaration();
         std::unique_ptr<TypeDecl> typeDeclaration();
+        std::unique_ptr<ClassDecl> expandAutoPattern(std::unique_ptr<AutoPatternStmt> autoPattern);
 
         std::unique_ptr<Statement> statement();
         std::unique_ptr<Statement> varDeclaration();
         std::unique_ptr<Statement> ifStatement();
         std::unique_ptr<Statement> whileStatement();
+        std::unique_ptr<Statement> forStatement();
+        std::unique_ptr<Statement> doWhileStatement();
         std::unique_ptr<Statement> switchStatement();
+        std::unique_ptr<Statement> tryCatchStatement();
+        std::unique_ptr<Statement> enumDeclaration();
+        std::unique_ptr<Statement> importStatement();
+        std::unique_ptr<Statement> exportStatement();
         std::unique_ptr<Statement> returnStatement();
         std::unique_ptr<Statement> expressionStatement();
-        std::vector<std::unique_ptr<Statement>> block();
+        std::vector<std::unique_ptr<Statement>> block(bool enableImplicitReturn = false);
 
         std::unique_ptr<Expression> expression();
         std::unique_ptr<Expression> nullishCoalescing();
@@ -55,6 +62,7 @@ namespace lpp
         std::unique_ptr<Expression> symbolicOps();
         std::unique_ptr<Expression> term();
         std::unique_ptr<Expression> factor();
+        std::unique_ptr<Expression> cast();
         std::unique_ptr<Expression> unary();
         std::unique_ptr<Expression> primary();
         std::unique_ptr<Expression> call();

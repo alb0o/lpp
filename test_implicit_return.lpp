@@ -1,0 +1,42 @@
+#pragma paradigm functional
+
+// Test implicit return - last expression becomes return automatically
+// Note: semicolon is still required, but return keyword is optional
+
+// Simple implicit return
+fn add(a: int, b: int) -> int {
+    a + b;
+}
+
+// Implicit return with expression
+fn multiply(x: int, y: int) -> int {
+    x * y;
+}
+
+// Implicit return with ternary
+fn max(a: int, b: int) -> int {
+    ?a > b -> a $ b;
+}
+
+// Explicit return still works
+fn subtract(a: int, b: int) -> int {
+    return a - b;
+}
+
+// Mixed: explicit in middle, implicit at end
+fn complex(x: int) -> int {
+    if (x < 0) {
+        return 0;
+    }
+    x * 2;
+}
+
+fn main() -> void {
+    let sum = add(5, 3);
+    let product = multiply(4, 7);
+    let maximum = max(10, 20);
+    let difference = subtract(15, 5);
+    let result = complex(8);
+    
+    print("Implicit return works!");
+}

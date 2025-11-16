@@ -1,0 +1,115 @@
+#pragma paradigm hybrid
+
+// Comprehensive test for all new L++ features
+
+// Enum at top level
+enum Status {
+    PENDING,
+    ACTIVE,
+    COMPLETED
+}
+
+// Generic identity function
+fn identity<T>(value: T) -> T {
+    return value;
+}
+
+// Generic swap function
+fn swap<T, U>(a: T, b: U) -> void {
+    print("Swapping values");
+}
+
+// Async function
+async fn fetchData() -> string {
+    return "Data loaded";
+}
+
+// Async with generics
+async fn processAsync<T>(value: T) -> T {
+    return value;
+}
+
+// Complex generic function
+fn mapArray<T, U>(size: int) -> void {
+    print("Map function with generics");
+}
+
+// Design pattern - Singleton
+@pattern Singleton
+class Config {
+    fn getSetting() -> string {
+        return "default";
+    }
+}
+
+// Design pattern - Observer
+@pattern Observer
+class EventManager {
+    fn notify() -> void {
+        print("Notifying observers");
+    }
+}
+
+// Main function with all features
+fn main() -> void {
+    // 5. Type annotations with arrays
+    let numbers: int[] = [1, 2, 3, 4, 5];
+    
+    // 6. Fixed-size arrays
+    let buffer: int[10] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    // 7. Nullable types
+    let maybeNumber: int? = 42;
+    
+    // 8. Union types
+    let flexible: int | string = 100;
+    
+    // 9. For-in loop
+    for (let num in numbers) {
+        print("Number");
+    }
+    
+    // 7. Do-while loop
+    let counter = 0;
+    do {
+        counter = counter + 1;
+    } while (counter < 5);
+    
+    // 8. Try-catch-finally
+    try {
+        let risky = 10;
+    } catch (error) {
+        print("Error caught");
+    } finally {
+        print("Cleanup completed");
+    }
+    
+    // 9. Switch-case
+    let currentStatus: Status = Status.ACTIVE;
+    switch (currentStatus) {
+        case Status.PENDING:
+            print("Status is pending");
+            break;
+        case Status.ACTIVE:
+            print("Status is active");
+            break;
+        case Status.COMPLETED:
+            print("Status is completed");
+            break;
+        default:
+            print("Unknown status");
+    }
+    
+    // 10. Destructuring arrays
+    let [first, second] = [10, 20];
+    
+    // 11. Destructuring objects
+    let {name, age} = {name: "John", age: 30};
+    
+    // 12. Cast expressions
+    let floatNum = 3.14;
+    let intNum = floatNum as int;
+    
+    print("All features compiled successfully!");
+}
+
