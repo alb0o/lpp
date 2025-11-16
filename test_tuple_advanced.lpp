@@ -1,0 +1,40 @@
+// Advanced Tuple Features Test
+#pragma paradigm hybrid
+
+// Function returning tuple
+fn getPoint() -> (int, int, int) {
+    return (100, 200, 300);
+}
+
+// Function with tuple parameter
+fn distance(point: (int, int)) -> int {
+    let (x, y) = point;
+    return x * x + y * y;
+}
+
+fn main() -> int {
+    // 1. Simple destructuring
+    let coords = (5, 10);
+    let (x, y) = coords;
+    print(x);
+    print(y);
+    
+    // 2. Direct destructuring from function
+    let (px, py, pz) = getPoint();
+    print(px);
+    
+    // 3. Pass tuple to function
+    let point2d = (3, 4);
+    let dist = distance(point2d);
+    print(dist);
+    
+    // 4. Swap values using tuple
+    let a = 10;
+    let b = 20;
+    let temp = (b, a);
+    let (a, b) = temp;
+    print(a);  // Should be 20
+    print(b);  // Should be 10
+    
+    return 0;
+}

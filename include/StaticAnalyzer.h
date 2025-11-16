@@ -166,6 +166,7 @@ namespace lpp
         void visit(AutoIterateExpr &node) override;
         void visit(IterateStepExpr &node) override;
         void visit(ArrayExpr &node) override;
+        void visit(TupleExpr &node) override;
         void visit(ListComprehension &node) override;
         void visit(SpreadExpr &node) override;
         void visit(IndexExpr &node) override;
@@ -177,8 +178,10 @@ namespace lpp
         void visit(YieldExpr &node) override;
         void visit(TypeOfExpr &node) override;
         void visit(InstanceOfExpr &node) override;
+        void visit(QuantumMethodCall &node) override;
 
         void visit(VarDecl &node) override;
+        void visit(QuantumVarDecl &node) override;
         void visit(Assignment &node) override;
         void visit(IfStmt &node) override;
         void visit(WhileStmt &node) override;

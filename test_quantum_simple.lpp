@@ -1,0 +1,17 @@
+// Simple quantum test
+#pragma paradigm hybrid
+
+fn main() -> int {
+    // Basic quantum variable
+    quantum let dice = [1, 2, 3, 4, 5, 6];
+    
+    let roll1 = dice.observe();
+    print(roll1);
+    
+    dice.reset();
+    
+    let roll2 = dice.observe();
+    print(roll2);
+    
+    return 0;
+}

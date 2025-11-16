@@ -67,6 +67,14 @@ namespace lpp
         FROM,
         AS,
         AUTOPATTERN, // Automatic design pattern generation
+
+        // Experimental Quantum Features
+        QUANTUM,       // Quantum variable declaration
+        EXPERIMENTAL,  // Experimental feature flag
+        OBSERVE,       // Collapse quantum state
+        ENTANGLE,      // Quantum entanglement
+        SUPERPOSITION, // Explicit superposition state
+
         NULL_KW,
         UNDEFINED,
         YIELD,      // Generator yield

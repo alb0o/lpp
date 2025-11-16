@@ -287,7 +287,18 @@ namespace lpp
         void accept(ASTVisitor &visitor) override;
     };
 
-    // List comprehension: [expr | var in range, predicates]
+    // Tuple literal: (1, 2, 3) or ("hello", 42, true)
+    class TupleExpr : public Expression
+    {
+    public:
+        std::vector<std::unique_ptr<Expression>> elements;
+
+        explicit TupleExpr(std::vector<std::unique_ptr<Expression>> elems)
+            : elements(std::move(elems)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // List comprehension: [x * 2 | x in range(10), x > 5]
     class ListComprehension : public Expression
     {
     public:
@@ -415,8 +426,26 @@ namespace lpp
         std::unique_ptr<Expression> expr;
         std::string typeName;
 
-        InstanceOfExpr(std::unique_ptr<Expression> e, const std::string &type)
-            : expr(std::move(e)), typeName(type) {}
+        InstanceOfExpr(std::unique_ptr<Expression> e, std::string tn)
+            : expr(std::move(e)), typeName(std::move(tn)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Quantum method call: x.observe(), x.map(fn), x.reset(), entangle(a, fn)
+    class QuantumMethodCall : public Expression
+    {
+    public:
+        std::string quantumVar;                        // variable name
+        std::string method;                            // observe, map, reset, entangle
+        std::vector<std::unique_ptr<Expression>> args; // arguments for map/entangle
+
+        QuantumMethodCall(const std::string &var, const std::string &meth)
+            : quantumVar(var), method(meth) {}
+
+        QuantumMethodCall(const std::string &var, const std::string &meth,
+                          std::vector<std::unique_ptr<Expression>> arguments)
+            : quantumVar(var), method(meth), args(std::move(arguments)) {}
+
         void accept(ASTVisitor &visitor) override;
     };
 
@@ -438,6 +467,28 @@ namespace lpp
 
         VarDecl(const std::string &n, const std::string &t, std::unique_ptr<Expression> init)
             : name(n), type(t), initializer(std::move(init)) {}
+        void accept(ASTVisitor &visitor) override;
+    };
+
+    // Quantum variable declaration: quantum let x = [states]
+    class QuantumVarDecl : public Statement
+    {
+    public:
+        std::string name;
+        std::string type;                                // element type
+        std::vector<std::unique_ptr<Expression>> states; // superposition states
+        std::vector<double> probabilities;               // optional weighted probabilities
+        bool hasWeights = false;
+
+        QuantumVarDecl(const std::string &n, const std::string &t,
+                       std::vector<std::unique_ptr<Expression>> st)
+            : name(n), type(t), states(std::move(st)) {}
+
+        QuantumVarDecl(const std::string &n, const std::string &t,
+                       std::vector<std::unique_ptr<Expression>> st,
+                       std::vector<double> probs)
+            : name(n), type(t), states(std::move(st)), probabilities(std::move(probs)), hasWeights(true) {}
+
         void accept(ASTVisitor &visitor) override;
     };
 
@@ -578,18 +629,20 @@ namespace lpp
         void accept(ASTVisitor &visitor) override;
     };
 
-    // Destructuring assignment: let [a, b] = arr or let {x, y} = obj
+    // Destructuring assignment: let [a, b] = arr or let {x, y} = obj or let (a, b) = tuple
     class DestructuringStmt : public Statement
     {
     public:
         std::vector<std::string> targets; // variable names
         std::unique_ptr<Expression> source;
-        bool isArray; // true for array, false for object
+        bool isArray;         // true for array, false for object
+        bool isTuple = false; // true for tuple
 
         DestructuringStmt(std::vector<std::string> tgts,
                           std::unique_ptr<Expression> src,
-                          bool arr)
-            : targets(std::move(tgts)), source(std::move(src)), isArray(arr) {}
+                          bool arr,
+                          bool tup = false)
+            : targets(std::move(tgts)), source(std::move(src)), isArray(arr), isTuple(tup) {}
         void accept(ASTVisitor &visitor) override;
     };
 
@@ -788,6 +841,7 @@ namespace lpp
         virtual void visit(AutoIterateExpr &node) = 0;
         virtual void visit(IterateStepExpr &node) = 0;
         virtual void visit(ArrayExpr &node) = 0;
+        virtual void visit(TupleExpr &node) = 0;
         virtual void visit(ListComprehension &node) = 0;
         virtual void visit(SpreadExpr &node) = 0;
         virtual void visit(IndexExpr &node) = 0;
@@ -799,8 +853,10 @@ namespace lpp
         virtual void visit(YieldExpr &node) = 0;
         virtual void visit(TypeOfExpr &node) = 0;
         virtual void visit(InstanceOfExpr &node) = 0;
+        virtual void visit(QuantumMethodCall &node) = 0;
 
         virtual void visit(VarDecl &node) = 0;
+        virtual void visit(QuantumVarDecl &node) = 0;
         virtual void visit(Assignment &node) = 0;
         virtual void visit(IfStmt &node) = 0;
         virtual void visit(WhileStmt &node) = 0;

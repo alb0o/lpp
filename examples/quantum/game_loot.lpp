@@ -1,0 +1,230 @@
+// ============================================
+// L++ QUANTUM FEATURES - Game Loot System
+// ============================================
+// Demonstrating quantum variables for procedural loot generation
+
+// #pragma experimental quantum
+
+// Item rarity system
+fn generateLoot() -> string {
+    // Quantum loot drop with weighted probabilities
+    quantum let rarity = {
+        "Common": 0.50,      // 50% common
+        "Uncommon": 0.30,    // 30% uncommon
+        "Rare": 0.15,        // 15% rare
+        "Epic": 0.04,        // 4% epic
+        "Legendary": 0.01    // 1% legendary (very rare!)
+    };
+    
+    // Collapse to get actual drop
+    let dropped = rarity.observe();
+    return dropped;
+}
+
+// Open treasure chest
+fn openChest(chestName: string) {
+    print("=== Opening Chest ===");
+    print(chestName);
+    print("");
+    
+    // Generate 5 items
+    for (let i = 0; i < 5; i = i + 1) {
+        let item = generateLoot();
+        print(item);
+    }
+    print("");
+}
+
+// Boss drop with guaranteed epic+
+fn bossDrop() -> string {
+    // Boss always drops epic or legendary
+    quantum let rarity = {
+        "Epic": 0.80,        // 80% epic
+        "Legendary": 0.20    // 20% legendary
+    };
+    
+    let dropped = rarity.observe();
+    return dropped;
+}
+
+// Weapon damage with quantum variance
+fn generateWeaponDamage(baseDamage: int) -> int {
+    // Damage rolls: ±20% variance
+    quantum let variance = [
+        -0.20, -0.15, -0.10, -0.05, 0.0, 0.05, 0.10, 0.15, 0.20
+    ];
+    
+    let roll = variance.observe();
+    let damage = baseDamage * (1.0 + roll);
+    
+    return damage;
+}
+
+// Dungeon layout generator
+fn generateDungeon() {
+    print("=== Procedural Dungeon Generation ===");
+    print("");
+    
+    // Quantum room types
+    quantum let roomType = {
+        "Combat": 0.40,      // 40% combat rooms
+        "Treasure": 0.25,    // 25% treasure rooms
+        "Puzzle": 0.20,      // 20% puzzle rooms
+        "Boss": 0.10,        // 10% boss rooms
+        "Secret": 0.05       // 5% secret rooms
+    };
+    
+    // Generate 10 rooms
+    for (let room = 1; room <= 10; room = room + 1) {
+        let type = roomType.observe();
+        print(type);
+        
+        // Reset for next room
+        roomType.reset();
+    }
+    print("");
+}
+
+// Critical hit system
+fn attackEnemy(damage: int) -> int {
+    // Quantum critical hit
+    quantum let critical = {
+        false: 0.90,  // 90% normal hit
+        true: 0.10    // 10% critical hit
+    };
+    
+    let isCrit = critical.observe();
+    
+    if (isCrit == true) {
+        print("CRITICAL HIT!");
+        return damage * 2;
+    }
+    
+    return damage;
+}
+
+// Loot box opening (gacha system)
+fn openLootBox(boxType: string) {
+    print("=== Loot Box Opened ===");
+    print(boxType);
+    print("");
+    
+    if (boxType == "Basic") {
+        // Basic box: mostly common
+        quantum let drop = {
+            "Common": 0.85,
+            "Uncommon": 0.14,
+            "Rare": 0.01
+        };
+        
+        let result = drop.observe();
+        print(result);
+    }
+    
+    if (boxType == "Premium") {
+        // Premium box: guaranteed rare+
+        quantum let drop = {
+            "Rare": 0.70,
+            "Epic": 0.25,
+            "Legendary": 0.05
+        };
+        
+        let result = drop.observe();
+        print(result);
+    }
+    
+    print("");
+}
+
+// Enemy AI behavior
+fn enemyBehavior() -> string {
+    // Quantum AI decision
+    quantum let action = {
+        "Attack": 0.50,
+        "Defend": 0.25,
+        "UseSkill": 0.15,
+        "Flee": 0.10
+    };
+    
+    let decision = action.observe();
+    return decision;
+}
+
+// Entangled loot (if sword drops, shield also drops)
+fn entangledDrops() {
+    print("=== Entangled Item Drops ===");
+    print("");
+    
+    // Primary drop
+    quantum let weapon = ["Sword", "Axe", "Bow", "Staff"];
+    
+    // Entangled armor (matches weapon type)
+    let armor = entangle(weapon, w => {
+        if (w == "Sword") { return "Shield"; }
+        if (w == "Axe") { return "Heavy Armor"; }
+        if (w == "Bow") { return "Light Armor"; }
+        if (w == "Staff") { return "Robe"; }
+        return "Cloth";
+    });
+    
+    // Collapse both (correlated!)
+    let droppedWeapon = weapon.observe();
+    let droppedArmor = armor.observe();
+    
+    print("Weapon:");
+    print(droppedWeapon);
+    print("Armor:");
+    print(droppedArmor);
+    print("");
+}
+
+// Main game loop
+fn main() -> int {
+    print("=== L++ Quantum Loot System ===");
+    print("");
+    
+    // 1. Open regular chest
+    openChest("Bronze Chest");
+    
+    // 2. Boss drops
+    print("Boss defeated! Drop:");
+    let bossloot = bossDrop();
+    print(bossloot);
+    print("");
+    
+    // 3. Weapon damage rolls
+    print("Weapon Damage Rolls (base: 100):");
+    for (let i = 0; i < 5; i = i + 1) {
+        let dmg = generateWeaponDamage(100);
+        print(dmg);
+    }
+    print("");
+    
+    // 4. Dungeon generation
+    generateDungeon();
+    
+    // 5. Combat with crits
+    print("=== Combat Simulation ===");
+    for (let attack = 0; attack < 5; attack = attack + 1) {
+        let damage = attackEnemy(50);
+        print(damage);
+    }
+    print("");
+    
+    // 6. Loot boxes
+    openLootBox("Basic");
+    openLootBox("Premium");
+    
+    // 7. Enemy AI
+    print("Enemy Actions:");
+    for (let turn = 0; turn < 3; turn = turn + 1) {
+        let action = enemyBehavior();
+        print(action);
+    }
+    print("");
+    
+    // 8. Entangled drops
+    entangledDrops();
+    
+    return 0;
+}
