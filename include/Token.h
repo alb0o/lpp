@@ -84,6 +84,14 @@ namespace lpp
         SET,        // Setter
         WHEN,       // Guard condition in switch/match
 
+        // Testing Framework
+        TEST,   // Test block declaration
+        ASSERT, // Assertion statement
+
+        // Macro System
+        MACRO,  // Macro definition
+        EXTERN, // FFI external declaration
+
         // Types
         TYPE_INT,
         TYPE_FLOAT,
@@ -176,6 +184,7 @@ namespace lpp
         int line;
         int column;
 
+        Token() : type(TokenType::END_OF_FILE), lexeme(""), line(0), column(0) {}
         Token(TokenType t, const std::string &lex, int ln, int col)
             : type(t), lexeme(lex), line(ln), column(col) {}
     };

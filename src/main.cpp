@@ -98,8 +98,15 @@ int main(int argc, char *argv[])
 
     // Parsing
     std::cout << "Parsing...\n";
-    lpp::Parser parser(tokens);
+    lpp::Parser parser(tokens, source); // Pass source code for better error messages
     std::unique_ptr<lpp::Program> ast = parser.parse();
+
+    // Check for parse errors
+    if (parser.hasErrors())
+    {
+        std::cerr << "\nParsing failed with " << parser.getErrors().size() << " error(s).\n";
+        return 1;
+    }
 
     // Static analysis
     std::cout << "Running static analysis...\n";
