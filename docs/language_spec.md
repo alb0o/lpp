@@ -1,4 +1,4 @@
-# LPP Language Specification v0.1
+# LPP Language Specification v0.8.13
 
 ## Core del Linguaggio
 
