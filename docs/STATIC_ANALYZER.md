@@ -1,4 +1,4 @@
-# Static Analyzer Implementation
+# Static Analyzer Implementation v0.8.13
 
 ## Overview
 Replaced the Rust-style borrow checker with a Clang-style static analyzer that performs control-flow analysis, data-flow analysis, and symbolic execution to detect real bugs in LPP programs before transpilation to C++.
