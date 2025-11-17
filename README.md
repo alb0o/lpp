@@ -4,7 +4,7 @@
 
 **A statically-typed systems language with modern syntax that transpiles to C++**
 
-**🎉 PRODUCTION-READY v0.1 - 101 Features Complete! 🎉**
+**🎉 BETA v0.8.13 - 101 Features Complete! 🎉**
 
 [Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/LANGUAGE_SPEC.md) • [Advanced Features](docs/ADVANCED_FEATURES.md) • [Design Patterns](docs/DESIGN_PATTERNS.md) • [Examples](examples/)
 
