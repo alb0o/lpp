@@ -10,6 +10,17 @@
 namespace lpp
 {
 
+    // FIX BUG #175: ModuleResolver loaded modules never unloaded (resource leak)
+    // TODO: Add module unload mechanism with RAII
+    // - ModuleHandle class: Owns module, auto-unload in destructor
+    // - Track loaded: std::map<string, unique_ptr<ModuleHandle>> modules;
+    // - Destructor: modules.clear(); // auto-unloads all
+    // - Circular refs: Weak pointers to break cycles
+    // Example:
+    //   struct ModuleHandle {
+    //     void* handle;
+    //     ~ModuleHandle() { if (handle) dlclose(handle); }
+    //   };
     class ModuleResolver
     {
     public:

@@ -9,6 +9,20 @@
 namespace lpp
 {
 
+    // FIX BUG #161: Parser lacks RAII guards for temporary allocations
+    // TODO: Add scope guards for error recovery resources
+    // - Use std::unique_ptr for temp AST nodes during parsing
+    // - RAII guard for token stream state (restore on exception)
+    // - ScopeGuard class for cleanup: auto guard = makeGuard([&]{ cleanup(); });
+    // Example:
+    //   struct ParserState {
+    //     size_t tokenPos;
+    //     ~ParserState() { /* restore state */ }
+    //   };
+    //   void parseExpr() {
+    //     ParserState state(current);
+    //     // On exception, state is auto-restored
+    //   }
     class Parser
     {
     public:
@@ -27,6 +41,49 @@ namespace lpp
         bool panicMode = false;               // Error recovery state
         std::string sourceCode;               // Original source for error context
         std::vector<std::string> sourceLines; // Split by line for easy access
+
+        // Helper to safely parse doubles with validation
+        bool safeStod(const std::string &str, double &result)
+        {
+            if (str.empty())
+                return false;
+
+            // Check for multiple dots or invalid characters
+            int dotCount = 0;
+            int eCount = 0;
+            for (size_t i = 0; i < str.length(); i++)
+            {
+                char c = str[i];
+                if (c == '.')
+                    dotCount++;
+                else if (c == 'e' || c == 'E')
+                    eCount++;
+                else if (i == 0 && (c == '-' || c == '+'))
+                    continue;
+                else if (!std::isdigit(c))
+                    return false;
+            }
+
+            if (dotCount > 1 || eCount > 1)
+                return false;
+
+            try
+            {
+                result = std::stod(str);
+                // Check for infinity (MSVC compatible)
+                if (result == std::numeric_limits<double>::infinity() ||
+                    result == -std::numeric_limits<double>::infinity() ||
+                    result != result) // NaN check
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch (...)
+            {
+                return false;
+            }
+        }
 
         Token peek() const;
         Token peekNext() const;

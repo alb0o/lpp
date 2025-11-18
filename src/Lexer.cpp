@@ -591,7 +591,7 @@ namespace lpp
                     result += '"';
                     break;
                 case '0':
-                    result += '\0';
+                    result += "\\0";
                     break;
                 default:
                     result += '\\';

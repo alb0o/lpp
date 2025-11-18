@@ -30,10 +30,19 @@ namespace lpp
                 std::string value = line.substr(colonPos + 1);
 
                 // Trim whitespace
-                key.erase(0, key.find_first_not_of(" \t"));
-                key.erase(key.find_last_not_of(" \t") + 1);
-                value.erase(0, value.find_first_not_of(" \t\""));
-                value.erase(value.find_last_not_of(" \t\",") + 1);
+                size_t keyStart = key.find_first_not_of(" \t");
+                if (keyStart != std::string::npos)
+                    key.erase(0, keyStart);
+                size_t keyEnd = key.find_last_not_of(" \t");
+                if (keyEnd != std::string::npos)
+                    key.erase(keyEnd + 1);
+
+                size_t valStart = value.find_first_not_of(" \t\"");
+                if (valStart != std::string::npos)
+                    value.erase(0, valStart);
+                size_t valEnd = value.find_last_not_of(" \t\",");
+                if (valEnd != std::string::npos)
+                    value.erase(valEnd + 1);
 
                 if (key == "name")
                     manifest.name = value;

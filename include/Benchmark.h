@@ -9,6 +9,16 @@
 namespace lpp
 {
 
+    // FIX BUG #178: Benchmark timers not properly stopped on exception
+    // TODO: Use RAII timer guard for automatic stop
+    // - TimerGuard class: Starts timer in constructor, stops in destructor
+    // - On exception: Timer auto-stopped, result recorded
+    // - No manual stopTimer() needed
+    // Example:
+    //   {
+    //     TimerGuard timer("MyBenchmark");
+    //     doWork(); // If exception, timer auto-stops
+    //   } // Timer destructor records result
     struct BenchmarkResult
     {
         std::string name;

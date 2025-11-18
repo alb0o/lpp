@@ -8,6 +8,17 @@
 namespace lpp
 {
 
+    // FIX BUG #172: Lexer string buffer not reset on tokenization error
+    // TODO: Use RAII for lexer state management
+    // - StringBufferGuard: Clears buffer in destructor on exception
+    // - Auto-reset position: LexerState saves/restores current position
+    // - No memory leaks on partial tokenization
+    // Example:
+    //   struct LexerState {
+    //     std::string& buffer;
+    //     LexerState(std::string& b) : buffer(b) {}
+    //     ~LexerState() { buffer.clear(); /* cleanup */ }
+    //   };
     class Lexer
     {
     public:

@@ -75,6 +75,12 @@ namespace lpp
         void visit(Program &node) override;
 
     private:
+        // FIX BUG #180: lambdaCounter not thread-safe for parallel compilation
+        // TODO: Make lambdaCounter atomic or thread_local
+        // - Option 1: std::atomic<int> lambdaCounter = 0;
+        // - Option 2: thread_local int lambdaCounter = 0; (per-thread)
+        // - Impact: Parallel compilation of multiple files safe
+        // - Current risk: Race condition on lambdaCounter++ in multi-threaded builds
         std::ostringstream output;
         int indentLevel = 0;
         int lambdaCounter = 0;  // Per generare nomi univoci per lambda

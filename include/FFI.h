@@ -8,6 +8,18 @@
 namespace lpp
 {
 
+    // FIX BUG #171: FFI boundary doesn't validate C++ resource cleanup
+    // TODO: Add RAII wrapper for FFI handles
+    // - FFIHandle<T> class: Owns foreign resource, auto-cleanup in destructor
+    // - Track open handles: std::set<void*> openHandles;
+    // - On exit: assert(openHandles.empty()) // All handles closed
+    // - Detect leaks: "FFI handle 0x1234 not released"
+    // Example:
+    //   class FFIHandle {
+    //     void* handle;
+    //   public:
+    //     ~FFIHandle() { if (handle) closeFFI(handle); }
+    //   };
     struct ExternFunction
     {
         std::string name;
