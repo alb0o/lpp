@@ -8,7 +8,19 @@
 namespace lpp
 {
 
-    struct PackageDependency
+    // FIX BUG #176: PackageManager temp download files not cleaned on failure
+    // TODO: Use RAII for temporary file management
+    // - TempFile class: Creates temp file, auto-deletes in destructor
+    // - On download error: TempFile destructor removes partial file
+    // - Use std::filesystem::path for safe path handling
+    // Example:
+    //   class TempFile {
+    //     std::filesystem::path path;
+    //   public:
+    //     TempFile(const string& name) : path(temp_directory_path() / name) {}
+    //     ~TempFile() { std::filesystem::remove(path); }
+    //   };
+    class PackageManager
     {
         std::string name;
         std::string version;

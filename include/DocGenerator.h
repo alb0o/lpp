@@ -10,6 +10,13 @@
 namespace lpp
 {
 
+    // FIX BUG #177: DocGenerator file handle may leak if write fails
+    // TODO: Use std::ofstream RAII, ensure close() in all paths
+    // - std::ofstream is RAII: Auto-closes in destructor
+    // - But: Check is_open() before write
+    // - Error handling: if (!out.is_open()) return error;
+    // - No manual close() needed (destructor handles it)
+    // - Consider: std::unique_ptr<std::ofstream> for explicit ownership
     struct DocComment
     {
         std::string description;

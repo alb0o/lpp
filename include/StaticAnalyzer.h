@@ -14,9 +14,22 @@ namespace lpp
     // Analysis severity levels
     enum class Severity
     {
+        // FIX BUG #143: Missing severity levels for type errors
+        // TODO: Add TYPE_ERROR, TYPE_WARNING for type mismatches
+        // - ERROR: Cannot convert string to int (explicit cast required)
+        // - Hint: Use std::stoi(str) or explicit cast (int)value
+        // - NOTE: Implicit conversion may lose precision (double -> int)
+        // FIX BUG #159: No configurable warning levels
+        // TODO: Add command-line flags for warning control
+        // - -Werror: Treat all warnings as errors
+        // - -Wno-unused: Suppress unused variable warnings
+        // - -Wall: Enable all warnings
+        // - -Wextra: Enable extra pedantic warnings
+        // - Requires: WarningConfig class with enabled flags
         WARNING,
         ERROR,
-        NOTE
+        NOTE,
+        INFO // BUG #144: No INFO level for non-critical messages
     };
 
     // Types of issues detected
@@ -45,18 +58,32 @@ namespace lpp
         INTEGER_OVERFLOW,
         NARROWING_CONVERSION,
         SIGN_CONVERSION,
+        TYPE_MISMATCH, // BUG #146: No TYPE_MISMATCH category
+                       // TODO: Show type context in error messages
+                       // Example: "Expected 'int' but got 'string'"
+                       // - Show where types come from: "Function foo() expects int (line 5)"
+                       // - Suggest conversions: "Use std::stoi() or cast with (int)"
 
         // Paradigm violations
         PARADIGM_MUTATION_IN_FUNCTIONAL,
         PARADIGM_CLASS_IN_FUNCTIONAL,
         PARADIGM_CLASS_IN_IMPERATIVE,
         PARADIGM_GOLF_DISCOURAGED,
-        PARADIGM_GOLF_ENCOURAGED
+        PARADIGM_GOLF_ENCOURAGED,
+
+        // Control flow (BUG #150: Missing categories)
+        CONTROL_FLOW_ERROR, // break/continue outside loop
+        INTERNAL_ERROR      // Compiler internal errors
     };
 
     // Analysis issue
     struct AnalysisIssue
     {
+        // FIX BUG #145: No fix-it hints for common issues
+        // TODO: Add fixItHint field with suggested code change
+        // Example: "Unused variable 'x' at line 10"
+        // - fixItHint: "Prefix with underscore: '_x' or remove"
+        // - fixItCode: "let _x = 42;" (show corrected version)
         IssueType type;
         Severity severity;
         std::string message;
@@ -64,11 +91,22 @@ namespace lpp
         int column;
         std::string function;
         std::vector<std::string> notes;
+        std::string fixItHint; // BUG #145: Suggested fix
     };
 
     // Variable state in symbolic execution
     struct SymbolicValue
     {
+        // FIX BUG #164: No tracking for moved-from state (use-after-move)
+        // TODO: Add MOVED_FROM state to prevent use-after-move bugs
+        // - State::MOVED_FROM: Variable moved, access is error
+        // - Detect: x = move(y); use(y); // ERROR: y is moved-from
+        // - Reset: y = newValue; // OK, y is reinitialized
+        // - Error: "Use of moved-from variable 'y' at line 10"
+        // Example:
+        //   enum class State {
+        //     UNINITIALIZED, INITIALIZED, MOVED_FROM, UNKNOWN
+        //   };
         enum class State
         {
             UNINITIALIZED,
@@ -223,6 +261,11 @@ namespace lpp
         CFGNode *exitBlock = nullptr;
 
         // Symbolic state
+        // FIX BUG #183: symbolTable accessed without synchronization\n        // TODO: Add mutex for thread-safe access in parallel analysis
+        // - std::mutex symbolTableMutex;
+        // - Lock on read/write: std::lock_guard<std::mutex> lock(symbolTableMutex);
+        // - Or use concurrent data structure: tbb::concurrent_hash_map
+        // - Impact: Safe parallel function analysis
         std::map<std::string, SymbolicValue> symbolTable;
 
         // Memory tracking

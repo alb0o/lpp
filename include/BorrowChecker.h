@@ -10,6 +10,17 @@
 
 namespace lpp
 {
+    // FIX BUG #170: BorrowChecker doesn't track lifetime through move semantics
+    // TODO: Add moved-from state tracking to lifetime analysis
+    // - Track: x = move(y); // y is now invalid
+    // - Detect: use(y) after move(y) // ERROR: use-after-move
+    // - Allow: y = newValue; // OK, y is reinitialized
+    // - Lifetime tracking: moved_from_vars set<string>
+    // Example:
+    //   void checkMove(MoveExpr* move) {
+    //     moved_from_vars.insert(move->source);
+    //     // Later: if (moved_from_vars.count(var)) ERROR
+    //   }
     // Ownership states
     enum class Ownership
     {

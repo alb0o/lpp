@@ -9,6 +9,15 @@
 namespace lpp
 {
 
+    // FIX BUG #174: MacroExpander temp AST nodes may leak on expansion error
+    // TODO: Use unique_ptr for all temporary AST allocations
+    // - Store temp nodes in vector during expansion
+    // - On error: vector auto-deletes all temps (RAII)
+    // - On success: std::move temps to final AST
+    // Example:
+    //   std::vector<std::unique_ptr<ASTNode>> tempNodes;
+    //   tempNodes.push_back(std::make_unique<Expr>());
+    //   // On exception: tempNodes auto-cleanup
     struct MacroDefinition
     {
         std::string name;

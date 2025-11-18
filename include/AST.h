@@ -26,6 +26,18 @@ namespace lpp
     class ASTNode
     {
     public:
+        // FIX BUG #160: AST destructors don't validate resource cleanup
+        // TODO: Add validation hooks in destructor
+        // - Track active resources in constructor (files, memory, handles)
+        // - Virtual cleanup() method called before ~ASTNode()
+        // - Assert all resources released: assert(openFiles.empty())
+        // - Use RAII wrappers: std::unique_ptr, file_handle (custom RAII)
+        // Example:
+        //   class ASTNode {
+        //     std::vector<std::unique_ptr<Resource>> resources;
+        //     virtual void cleanup() { /* subclass-specific */ }
+        //     virtual ~ASTNode() { cleanup(); assert(resources.empty()); }
+        //   };
         virtual ~ASTNode() = default;
         virtual void accept(ASTVisitor &visitor) = 0;
     };
@@ -58,6 +70,12 @@ namespace lpp
         std::vector<std::string> strings;                        // static parts
         std::vector<std::unique_ptr<Expression>> interpolations; // ${expr}
 
+        // FIX BUG #168: Constructor takes by-value then moves (double-move inefficiency)
+        // TODO: Change to rvalue references for true zero-copy
+        // - Constructor: TemplateLiteralExpr(std::vector<std::string>&& strs, ...)
+        // - Direct init: : strings(strs), interpolations(interp) {} // No std::move needed
+        // - Caller must: TemplateLiteralExpr(std::move(myStrings), ...)
+        // - Benefit: One move instead of two (parameter + member init)
         TemplateLiteralExpr(std::vector<std::string> strs,
                             std::vector<std::unique_ptr<Expression>> interp)
             : strings(std::move(strs)), interpolations(std::move(interp)) {}

@@ -5,6 +5,10 @@
 #define LPP_PATTERNS_H
 
 // This header is generated when @pattern keyword is detected in OOP mode
+// FIX BUG #68: Pattern macros must be used with care to avoid ODR violations
+// WARNING: static members in macros require explicit definition in .cpp
+// Example: std::unique_ptr<ClassName> ClassName::instance = nullptr;
+//          std::mutex ClassName::mutex;
 
 namespace lpp
 {
@@ -14,9 +18,11 @@ namespace lpp
 // ===== SINGLETON PATTERN =====
 // Usage: @pattern Singleton
 // Generates thread-safe singleton with lazy initialization
+// Uses unique_ptr for automatic cleanup (FIX BUG #54)
+// WARNING BUG #71: Macro must be used inside class definition
 #define LPP_PATTERN_SINGLETON(ClassName)              \
 private:                                              \
-    static ClassName *instance;                       \
+    static std::unique_ptr<ClassName> instance;       \
     static std::mutex mutex;                          \
     ClassName() {}                                    \
     ClassName(const ClassName &) = delete;            \
@@ -28,23 +34,24 @@ public:                                               \
         std::lock_guard<std::mutex> lock(mutex);      \
         if (instance == nullptr)                      \
         {                                             \
-            instance = new ClassName();               \
+            instance = std::make_unique<ClassName>(); \
         }                                             \
-        return instance;                              \
+        return instance.get();                        \
     }
 
 // ===== FACTORY PATTERN =====
 // Usage: @pattern Factory
 // Generates factory method for object creation
-#define LPP_PATTERN_FACTORY(BaseClass, ConcreteClass) \
-public:                                               \
-    static BaseClass *create(const std::string &type) \
-    {                                                 \
-        if (type == #ConcreteClass)                   \
-        {                                             \
-            return new ConcreteClass();               \
-        }                                             \
-        return nullptr;                               \
+// Returns unique_ptr for automatic memory management (FIX BUG #55)
+#define LPP_PATTERN_FACTORY(BaseClass, ConcreteClass)                 \
+public:                                                               \
+    static std::unique_ptr<BaseClass> create(const std::string &type) \
+    {                                                                 \
+        if (type == #ConcreteClass)                                   \
+        {                                                             \
+            return std::make_unique<ConcreteClass>();                 \
+        }                                                             \
+        return nullptr;                                               \
     }
 
 // ===== OBSERVER PATTERN =====
@@ -156,19 +163,19 @@ public:                               \
 
 // ===== CHAIN OF RESPONSIBILITY =====
 // Usage: @pattern ChainOfResponsibility
-// Generates handler chain
-#define LPP_PATTERN_CHAIN()                            \
-private:                                               \
-    Handler *next = nullptr;                           \
-                                                       \
-public:                                                \
-    void setNext(Handler *handler) { next = handler; } \
-    void handleRequest()                               \
-    {                                                  \
-        if (next != nullptr)                           \
-        {                                              \
-            next->handleRequest();                     \
-        }                                              \
+// Generates handler chain with smart pointers (FIX BUG #56)
+#define LPP_PATTERN_CHAIN()                                                       \
+private:                                                                          \
+    std::unique_ptr<Handler> next = nullptr;                                      \
+                                                                                  \
+public:                                                                           \
+    void setNext(std::unique_ptr<Handler> handler) { next = std::move(handler); } \
+    void handleRequest()                                                          \
+    {                                                                             \
+        if (next != nullptr)                                                      \
+        {                                                                         \
+            next->handleRequest();                                                \
+        }                                                                         \
     }
 
     } // namespace patterns

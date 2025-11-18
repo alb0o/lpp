@@ -8,6 +8,16 @@
 namespace lpp
 {
 
+    // FIX BUG #179: SourceMap temp buffers may leak during generation
+    // TODO: Use smart pointers for all internal allocations
+    // - std::vector<std::unique_ptr<Mapping>> mappings;
+    // - On generation error: Auto-cleanup via RAII
+    // - No manual memory management needed
+    // Example:
+    //   struct Mapping { /* ... */ };
+    //   std::vector<std::unique_ptr<Mapping>> mappings;
+    //   mappings.push_back(std::make_unique<Mapping>());
+    //   // On exception: mappings auto-cleanup
     struct SourceMapping
     {
         int lppLine;

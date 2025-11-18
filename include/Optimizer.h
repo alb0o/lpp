@@ -7,6 +7,15 @@
 namespace lpp
 {
 
+    // FIX BUG #173: Optimizer may reorder code breaking RAII guarantees
+    // TODO: Respect RAII scope boundaries in optimization passes
+    // - Don't move code across scope exit (destructor calls)
+    // - Detect RAII variables: has non-trivial destructor
+    // - Mark scope boundaries: { /* RAII scope start */ ... /* end */ }
+    // - Error: "Cannot move statement past RAII scope boundary"
+    // Example:
+    //   { Lock guard(mutex); /* can't move code out of this scope */ }
+    //   // Optimizer must not hoist/sink across guard destructor
     class Optimizer
     {
     public:

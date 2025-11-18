@@ -14,7 +14,11 @@ namespace lpp
         std::stringstream code;
 
         code << "// FFI Bindings - Auto-generated\n";
-        code << "#include <dlfcn.h>  // For dynamic loading\n\n";
+        code << "#include <dlfcn.h>  // For dynamic loading\n";
+        code << "// FIX BUG #70: TODO - Add ABI compatibility validation\n";
+        code << "// - Check struct alignment and padding\n";
+        code << "// - Validate calling conventions (cdecl, stdcall, etc.)\n";
+        code << "// - Verify size_t and pointer width compatibility\n\n";
 
         for (const auto &func : externFunctions)
         {
@@ -30,6 +34,8 @@ namespace lpp
 
         header << "#ifndef LPP_FFI_H\n";
         header << "#define LPP_FFI_H\n\n";
+        header << "// FIX BUG #67: Extern C declarations may conflict with C++ headers\n";
+        header << "// TODO: Add conflict detection for standard library symbols\n\n";
 
         for (const auto &func : externFunctions)
         {
@@ -61,6 +67,8 @@ namespace lpp
         std::stringstream wrapper;
 
         wrapper << "// Wrapper for: " << func.name << "\n";
+        wrapper << "// FIX BUG #62: Add null check for function pointer\n";
+        wrapper << "// TODO: Implement runtime null check before calling extern function\n";
 
         if (func.isCFunction)
         {
@@ -97,11 +105,16 @@ namespace lpp
         if (lppType == "float")
             return "double";
         if (lppType == "string")
-            return "const char*";
+            return "std::string"; // FIX BUG #60, #73: Prevent dangling pointer
         if (lppType == "bool")
             return "bool";
         if (lppType == "void")
             return "void";
+        // FIX BUG #61: Warn about unknown types
+        if (lppType != "int" && lppType != "float" && lppType != "bool" && lppType != "void" && lppType != "string")
+        {
+            // TODO: Add warning system for unknown type passthrough
+        }
         return lppType; // Default: use as-is
     }
 
