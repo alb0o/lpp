@@ -4,7 +4,7 @@
 
 **A statically-typed systems language with modern syntax that transpiles to C++**
 
-**🎉 BETA v0.8.13 - 101 Features Complete! 🎉**
+**🔧 DEVELOPMENT v0.8.14 - Thread Safety & Concurrency (180/200 bugs fixed) 🔧**
 
 [Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/LANGUAGE_SPEC.md) • [Advanced Features](docs/ADVANCED_FEATURES.md) • [Design Patterns](docs/DESIGN_PATTERNS.md) • [Examples](examples/)
 

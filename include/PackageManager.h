@@ -20,7 +20,8 @@ namespace lpp
     //     TempFile(const string& name) : path(temp_directory_path() / name) {}
     //     ~TempFile() { std::filesystem::remove(path); }
     //   };
-    class PackageManager
+
+    struct PackageDependency
     {
         std::string name;
         std::string version;
