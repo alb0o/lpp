@@ -105,11 +105,20 @@ namespace lpp
             void enqueue(const T &item) { data.push(item); }
             T dequeue()
             {
-                T item = data.front();
+                // FIX BUG #201a: No empty check causes undefined behavior
+                if (data.empty())
+                    throw std::runtime_error("dequeue from empty queue");
+                T item = std::move(const_cast<T&>(data.front())); // Move instead of copy
                 data.pop();
                 return item;
             }
-            T peek() const { return data.front(); }
+            T peek() const
+            {
+                // FIX BUG #201a: peek() crashes on empty queue
+                if (data.empty())
+                    throw std::runtime_error("peek on empty queue");
+                return data.front();
+            }
             bool isEmpty() const { return data.empty(); }
             int size() const { return data.size(); }
         };
@@ -146,18 +155,36 @@ namespace lpp
             void pushBack(const T &item) { data.push_back(item); }
             T popFront()
             {
-                T item = data.front();
+                // FIX BUG #201b: No empty check causes undefined behavior
+                if (data.empty())
+                    throw std::runtime_error("popFront from empty deque");
+                T item = std::move(data.front()); // Move semantics
                 data.pop_front();
                 return item;
             }
             T popBack()
             {
-                T item = data.back();
+                // FIX BUG #201b: No empty check causes undefined behavior
+                if (data.empty())
+                    throw std::runtime_error("popBack from empty deque");
+                T item = std::move(data.back()); // Move semantics
                 data.pop_back();
                 return item;
             }
-            T peekFront() const { return data.front(); }
-            T peekBack() const { return data.back(); }
+            T peekFront() const
+            {
+                // FIX BUG #201b: peek crashes on empty deque
+                if (data.empty())
+                    throw std::runtime_error("peekFront on empty deque");
+                return data.front();
+            }
+            T peekBack() const
+            {
+                // FIX BUG #201b: peek crashes on empty deque
+                if (data.empty())
+                    throw std::runtime_error("peekBack on empty deque");
+                return data.back();
+            }
             int size() const { return data.size(); }
             bool isEmpty() const { return data.empty(); }
         };
@@ -194,13 +221,19 @@ namespace lpp
             void pushBack(const T &item) { data.push_back(item); }
             T popFront()
             {
-                T item = data.front();
+                // FIX BUG #201c: No empty check causes undefined behavior
+                if (data.empty())
+                    throw std::runtime_error("popFront from empty list");
+                T item = std::move(data.front()); // Move semantics
                 data.pop_front();
                 return item;
             }
             T popBack()
             {
-                T item = data.back();
+                // FIX BUG #201c: No empty check causes undefined behavior
+                if (data.empty())
+                    throw std::runtime_error("popBack from empty list");
+                T item = std::move(data.back()); // Move semantics
                 data.pop_back();
                 return item;
             }
