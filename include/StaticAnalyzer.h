@@ -282,7 +282,7 @@ namespace lpp
         void buildCFG(std::vector<std::unique_ptr<Statement>> &statements);
         CFGNode *createNode(CFGNode::Type type);
         void connectNodes(CFGNode *from, CFGNode *to);
-        void traverseCFG(CFGNode *node); // DFS traversal to mark reachable nodes
+        void traverseCFG(CFGNode *node, int depth = 0); // DFS traversal to mark reachable nodes
 
         // Advanced CFG building for control flow
         CFGNode *buildCFGForStatement(Statement *stmt, CFGNode *breakTarget = nullptr, CFGNode *continueTarget = nullptr);

@@ -540,7 +540,7 @@ namespace lpp
         }
     }
 
-    void StaticAnalyzer::traverseCFG(CFGNode *node)
+    void StaticAnalyzer::traverseCFG(CFGNode *node, int depth)
     {
         if (!node || visitedNodes.find(node) != visitedNodes.end())
         {
@@ -548,13 +548,15 @@ namespace lpp
         }
 
         // FIX BUG #78: Prevent stack overflow on deep recursion
-        static int recursionDepth = 0;
+        // FIX BUG #200: Use parameter instead of static variable for thread safety
+        // - Static variable causes race conditions in parallel analysis
+        // - Parameter-based depth is thread-safe and reentrant
+        // - No counter leak on early return or exception
         const int MAX_DEPTH = 10000;
-        if (++recursionDepth > MAX_DEPTH)
+        if (depth > MAX_DEPTH)
         {
             reportIssue(IssueType::INTERNAL_ERROR, Severity::ERROR,
                         "CFG traversal exceeded maximum depth (possible infinite loop)", {});
-            --recursionDepth;
             return;
         }
 
@@ -564,10 +566,8 @@ namespace lpp
         // Recursively visit all successors (DFS)
         for (auto *successor : node->successors)
         {
-            traverseCFG(successor);
+            traverseCFG(successor, depth + 1);
         }
-
-        --recursionDepth;
     }
 
     bool StaticAnalyzer::canBeZero(Expression *expr)
