@@ -4,7 +4,7 @@
 
 **A statically-typed systems language with modern syntax that transpiles to C++**
 
-**🔧 DEVELOPMENT v0.8.14 - Thread Safety & Concurrency (180/200 bugs fixed) 🔧**
+**🔧 DEVELOPMENT v0.8.15 - Thread Safety & Concurrency (184/200 bugs fixed - 92%) 🔧**
 
 [Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/LANGUAGE_SPEC.md) • [Advanced Features](docs/ADVANCED_FEATURES.md) • [Design Patterns](docs/DESIGN_PATTERNS.md) • [Examples](examples/)
 
