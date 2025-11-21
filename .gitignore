@@ -30,10 +30,10 @@ Thumbs.db
 # Dependencies
 node_modules/
 
-# Git rebase/renumbering scripts (sensitive)
-auto-renumber.sh
-fix-messages.sh
-renumber-filter.sh
+# Internal scripts folder (git tools, automation, etc.)
+.scripts/
+
+# Git rebase/renumbering artifacts (sensitive)
 renumber_commits.py
 renumber-plan.txt
 rebase-todo.txt
