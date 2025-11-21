@@ -1,4 +1,4 @@
-# LPP Language Specification v0.8.13
+# LPP Language Specification v0.8.17
 ## Light Programming Language - Dual Syntax Edition
 
 LPP è un linguaggio innovativo con **sintassi duale**:

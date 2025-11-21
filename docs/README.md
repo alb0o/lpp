@@ -173,7 +173,7 @@ Located in `vscode-extension/` directory:
 
 ## 📊 Status
 
-**Version:** 0.8.13  
+**Version:** 0.8.17  
 **Status:** ✅ Production-Ready  
 **Features:** 101/101 (100% Complete)  
 **Bugs Fixed:** 13 critical bugs resolved  

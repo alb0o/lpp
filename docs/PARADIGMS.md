@@ -1,4 +1,4 @@
-# Paradigm Enforcement in L++ v0.8.13
+# Paradigm Enforcement in L++ v0.8.17
 
 L++ is a **multiparadigm language** that supports imperative, functional, object-oriented, and hybrid programming styles. To prevent architectural chaos and maintain code consistency, **every file must explicitly declare its paradigm** using a pragma directive at the beginning.
 

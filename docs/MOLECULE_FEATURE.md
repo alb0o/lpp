@@ -616,6 +616,6 @@ This feature makes L++ uniquely suited for applications in networking, AI, game 
 
 ---
 
-**Version:** L++ v0.8.16  
+**Version:** L++ v0.8.17  
 **Feature Status:** Production-Ready ✅  
 **Last Updated:** 2025-11-19
