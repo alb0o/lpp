@@ -3,12 +3,24 @@
 #include <fstream>
 #include <iomanip>
 #include <algorithm>
+#include <filesystem>
 
 namespace lpp
 {
 
     BenchmarkResult Benchmark::run(const std::string &name, std::function<void()> func, size_t iterations)
     {
+        // FIX BUG #353: Validate iterations to prevent division by zero
+        if (iterations == 0)
+        {
+            std::cerr << "Error: Benchmark iterations must be > 0\n";
+            BenchmarkResult result;
+            result.name = name;
+            result.iterations = 1; // Fallback to prevent division by zero
+            result.durationMs = 0.0;
+            return result;
+        }
+
         BenchmarkResult result;
         result.name = name;
         result.iterations = iterations;
@@ -74,21 +86,19 @@ namespace lpp
     {
         std::cout << "Running runtime benchmark: " << executable << "\n";
 
-        // FIX BUG #334: Validate executable path before execution
-        auto isValidPath = [](const std::string &path)
+        // FIX BUG #347: Validate executable path with filesystem::canonical
+        try
         {
-            return path.find("..") == std::string::npos &&
-                   path.find(';') == std::string::npos &&
-                   path.find('|') == std::string::npos &&
-                   path.find('&') == std::string::npos &&
-                   path.find('`') == std::string::npos &&
-                   path.find('$') == std::string::npos &&
-                   !path.empty();
-        };
-
-        if (!isValidPath(executable))
+            auto canonical = std::filesystem::canonical(executable);
+            if (!std::filesystem::exists(canonical))
+            {
+                std::cerr << "Error: Executable does not exist: " << executable << "\n";
+                return;
+            }
+        }
+        catch (const std::filesystem::filesystem_error &e)
         {
-            std::cerr << "Error: Invalid executable path\n";
+            std::cerr << "Error: Invalid executable path: " << e.what() << "\n";
             return;
         }
 

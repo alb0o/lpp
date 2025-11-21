@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 #include <optional>
+#include <mutex> // BUG #183 fix
 
 namespace lpp
 {
@@ -56,6 +57,7 @@ namespace lpp
 
         // Type issues
         INTEGER_OVERFLOW,
+        POTENTIAL_OVERFLOW, // BUG #328: Runtime overflow possibility
         NARROWING_CONVERSION,
         SIGN_CONVERSION,
         TYPE_MISMATCH, // BUG #146: No TYPE_MISMATCH category
@@ -114,6 +116,7 @@ namespace lpp
             NULL_PTR,
             NON_NULL,
             FREED,
+            MOVED_FROM, // BUG #164 fix: Track moved-from variables
             UNKNOWN
         };
 
@@ -262,11 +265,8 @@ namespace lpp
         CFGNode *exitBlock = nullptr;
 
         // Symbolic state
-        // FIX BUG #183: symbolTable accessed without synchronization\n        // TODO: Add mutex for thread-safe access in parallel analysis
-        // - std::mutex symbolTableMutex;
-        // - Lock on read/write: std::lock_guard<std::mutex> lock(symbolTableMutex);
-        // - Or use concurrent data structure: tbb::concurrent_hash_map
-        // - Impact: Safe parallel function analysis
+        // BUG #182 & #183 fix: Thread-safe symbol table access
+        mutable std::mutex symbolTableMutex;
         std::map<std::string, SymbolicValue> symbolTable;
 
         // Memory tracking

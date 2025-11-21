@@ -4,6 +4,7 @@
 #include <sstream>
 #include <set>
 #include <tuple>
+#include <limits>
 
 namespace lpp
 {
@@ -285,9 +286,9 @@ namespace lpp
         panicMode = false;
         advance();
 
-        // FIX BUG #84 & #303: Prevent infinite loop in synchronization
-        // Increased limit and added safety check for malformed input
-        static constexpr int MAX_SYNC_ADVANCES = 2000;
+        // FIX BUG #84, #303 & #330: Prevent infinite loop in synchronization
+        // Reduced limit to prevent hang on severely malformed input
+        static constexpr int MAX_SYNC_ADVANCES = 500; // Reduced from 2000
         int advances = 0;
 
         while (!isAtEnd() && advances < MAX_SYNC_ADVANCES)
@@ -355,6 +356,15 @@ namespace lpp
         panicMode = true; // FIX BUG #85: Will be cleared by synchronize() or parse completion
 
         Token token = peek();
+
+        // BUG #333 fix: Deduplicate errors at same location
+        auto errorLocation = std::make_pair(token.line, token.column);
+        if (reportedErrors.count(errorLocation))
+        {
+            return; // Already reported an error at this exact location
+        }
+        reportedErrors.insert(errorLocation);
+
         std::stringstream errorMsg;
 
         // FIX BUG #153: No source file path in error messages
@@ -673,12 +683,17 @@ namespace lpp
                     double arraySizeDouble = 0;
                     if (safeStod(sizeToken.lexeme, arraySizeDouble))
                     {
-                        arraySize = static_cast<int>(arraySizeDouble);
-                        // Validate positive size
-                        if (arraySize <= 0)
+                        // FIX BUG #351: Validate range before cast to prevent overflow
+                        constexpr double MAX_INT = static_cast<double>(std::numeric_limits<int>::max());
+                        if (arraySizeDouble < 1.0 || arraySizeDouble > MAX_INT)
                         {
-                            error("Array size must be positive, got: " + std::to_string(arraySize));
+                            error("Array size out of valid range (1 to " + std::to_string(std::numeric_limits<int>::max()) +
+                                  "), got: " + sizeToken.lexeme);
                             arraySize = 0;
+                        }
+                        else
+                        {
+                            arraySize = static_cast<int>(arraySizeDouble);
                         }
                     }
                     else
@@ -2171,7 +2186,19 @@ namespace lpp
                     double enumValueDouble = 0;
                     if (safeStod(num.lexeme, enumValueDouble))
                     {
-                        value = static_cast<int>(enumValueDouble);
+                        // FIX BUG #352: Validate range before cast to prevent overflow
+                        constexpr double MAX_INT = static_cast<double>(std::numeric_limits<int>::max());
+                        constexpr double MIN_INT = static_cast<double>(std::numeric_limits<int>::min());
+                        if (enumValueDouble < MIN_INT || enumValueDouble > MAX_INT)
+                        {
+                            error("Enum value out of valid range (" + std::to_string(std::numeric_limits<int>::min()) +
+                                  " to " + std::to_string(std::numeric_limits<int>::max()) + "), got: " + num.lexeme);
+                            value = currentValue;
+                        }
+                        else
+                        {
+                            value = static_cast<int>(enumValueDouble);
+                        }
                     }
                     else
                     {

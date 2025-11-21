@@ -1,4 +1,4 @@
-# L++ Documentation v0.8.16
+# L++ Documentation v0.8.17
 
 Complete documentation for the L++ programming language.
 
@@ -24,18 +24,14 @@ Complete documentation for the L++ programming language.
 
 ---
 
-## 📦 Deprecated Files (Content Merged)
+## 📦 Deprecated/Consolidated Files
 
-The following files have been consolidated into **[ALL_BUGS_COMPLETE.md](ALL_BUGS_COMPLETE.md)**:
-- ~~24_BUG_SUMMARY_IT.md~~ (31 stdlib bugs - now in ALL_BUGS section 1)
-- ~~25_NEW_CRITICAL_BUGS.md~~ (25 compiler bugs - now in ALL_BUGS sections 1-2)
-- ~~36_BUGS_FINAL_SUMMARY.md~~ (incomplete summary - superseded)
-- ~~STDLIB_BUG_FIXES_COMPLETE.md~~ (stdlib only - now part of complete report)
-- ~~BUG_FIXES_ITERATION_*.md~~ (historical iterations - archived)
-- ~~ITERATION_*_SUMMARY.md~~ (old summaries - archived)
-- ~~STDLIB_BUGS_COMPLETE_ANALYSIS.md~~ (duplicate - merged)
-- ~~CONCURRENCY_BUGS_FINAL.md~~ (subset - merged into ALL_BUGS)
-- ~~MOLECULE_VALIDATION_REPORT.md~~ (validation - in MOLECULE_FEATURE.md)
+Historical bug tracking files have been consolidated into **[BUG_FIXES.md](BUG_FIXES.md)** which now contains:
+- All 45 bugs fixed in v0.8.17 (Sessions 1-3)
+- Security audit results (9.5/10)
+- RAII implementation details
+- Thread safety improvements
+- Historical bug fixes from v0.8.16
 
 ---
 
@@ -49,7 +45,7 @@ The following files have been consolidated into **[ALL_BUGS_COMPLETE.md](ALL_BUG
 - Arrays (dynamic and fixed-size)
 - Generics (`<T>`)
 
-**Reference:** [LANGUAGE_SPEC.md](LANGUAGE_SPEC.md#type-system)
+**Reference:** [FULL_SPEC.md](FULL_SPEC.md#type-system)
 
 ---
 
@@ -60,7 +56,7 @@ The following files have been consolidated into **[ALL_BUGS_COMPLETE.md](ALL_BUG
 - Try-catch-finally
 - Break/continue
 
-**Reference:** [LANGUAGE_SPEC.md](LANGUAGE_SPEC.md#control-flow)
+**Reference:** [FULL_SPEC.md](FULL_SPEC.md#control-flow)
 
 ---
 

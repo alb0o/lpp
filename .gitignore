@@ -30,10 +30,10 @@ Thumbs.db
 # Dependencies
 node_modules/
 
-# Internal scripts folder (git tools, automation, etc.)
-.scripts/
-
-# Git rebase/renumbering artifacts (sensitive)
+# Git rebase/renumbering scripts (sensitive)
+auto-renumber.sh
+fix-messages.sh
+renumber-filter.sh
 renumber_commits.py
 renumber-plan.txt
 rebase-todo.txt
@@ -42,3 +42,5 @@ RENUMBER_GUIDE.txt
 .copilot-memory.md
 
 release/
+
+.copilot-memory-OLD.md

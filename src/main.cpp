@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdlib>
 #include <algorithm>
+#include <filesystem> // BUG #334 fix: for canonical path validation
 #include "Lexer.h"
 #include "Parser.h"
 #include "Transpiler.h"
@@ -235,10 +236,9 @@ int main(int argc, char *argv[])
     // Compile with g++ (or clang++)
     std::cout << "Compiling with g++...\n";
 
-    // Sanitize path to prevent command injection
+    // BUG #334 fix: Validate paths with filesystem canonical
     std::string sanitizedOutput = outputFile;
-    // FIX BUG #334: Use safer command execution instead of system()
-    // Validate file paths to prevent command injection
+
     auto isValidPath = [](const std::string &path)
     {
         return path.find("..") == std::string::npos &&
@@ -253,6 +253,22 @@ int main(int argc, char *argv[])
     if (!isValidPath(cppFile) || !isValidPath(outputFile))
     {
         std::cerr << "Error: Invalid file path detected\n";
+        return 1;
+    }
+
+    // Additional validation: ensure files exist and are canonical
+    try
+    {
+        auto canonicalCpp = std::filesystem::canonical(cppFile);
+        if (!std::filesystem::exists(canonicalCpp))
+        {
+            std::cerr << "Error: C++ file does not exist\n";
+            return 1;
+        }
+    }
+    catch (const std::filesystem::filesystem_error &e)
+    {
+        std::cerr << "Error: Invalid C++ file path: " << e.what() << "\n";
         return 1;
     }
 

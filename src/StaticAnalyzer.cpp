@@ -426,6 +426,7 @@ namespace lpp
 
     void StaticAnalyzer::checkNullDereference(IdentifierExpr &node)
     {
+        std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
         auto it = symbolTable.find(node.name);
         if (it != symbolTable.end())
         {
@@ -459,6 +460,7 @@ namespace lpp
 
     void StaticAnalyzer::checkUninitializedRead(IdentifierExpr &node)
     {
+        std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
         auto it = symbolTable.find(node.name);
         if (it != symbolTable.end())
         {
@@ -486,9 +488,17 @@ namespace lpp
                 {
                     result = *leftVal.constantValue + *rightVal.constantValue;
                 }
-                else
+                else if (node.op == "*")
                 {
                     result = *leftVal.constantValue * *rightVal.constantValue;
+                }
+                else if (node.op == "-")
+                {
+                    result = *leftVal.constantValue - *rightVal.constantValue;
+                }
+                else // "<<"
+                {
+                    result = *leftVal.constantValue << *rightVal.constantValue;
                 }
 
                 // Check for overflow (simplified)
@@ -498,6 +508,14 @@ namespace lpp
                                 "Integer overflow in arithmetic operation",
                                 {"Result exceeds 32-bit integer bounds"});
                 }
+            }
+            // BUG #328 fix: Warn for potential runtime overflow on non-constant expressions
+            else if (!leftVal.constantValue || !rightVal.constantValue)
+            {
+                // Runtime operation - could overflow
+                reportIssue(IssueType::POTENTIAL_OVERFLOW, Severity::INFO,
+                            "Arithmetic operation '" + node.op + "' may overflow at runtime",
+                            {"Consider using checked arithmetic, larger types (int64_t), or bounds validation"});
             }
         }
     }
@@ -579,6 +597,7 @@ namespace lpp
 
         if (auto *ident = dynamic_cast<IdentifierExpr *>(expr))
         {
+            std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
             auto it = symbolTable.find(ident->name);
             if (it != symbolTable.end() && it->second.constantValue)
             {
@@ -593,6 +612,7 @@ namespace lpp
     {
         if (auto *ident = dynamic_cast<IdentifierExpr *>(expr))
         {
+            std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
             auto it = symbolTable.find(ident->name);
             if (it != symbolTable.end())
             {
@@ -613,6 +633,7 @@ namespace lpp
         }
         else if (auto *ident = dynamic_cast<IdentifierExpr *>(expr))
         {
+            std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
             auto it = symbolTable.find(ident->name);
             if (it != symbolTable.end())
             {
@@ -873,7 +894,10 @@ namespace lpp
             val.state = SymbolicValue::State::UNINITIALIZED;
         }
 
-        symbolTable[node.name] = val;
+        {
+            std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
+            symbolTable[node.name] = val;
+        }
     }
 
     void StaticAnalyzer::visit(QuantumVarDecl &node)
@@ -892,7 +916,10 @@ namespace lpp
         // Register quantum variable
         SymbolicValue val;
         val.state = SymbolicValue::State::INITIALIZED;
-        symbolTable[node.name] = val;
+        {
+            std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
+            symbolTable[node.name] = val;
+        }
     }
 
     void StaticAnalyzer::visit(Assignment &node)
@@ -906,7 +933,10 @@ namespace lpp
 
         SymbolicValue val;
         val.state = SymbolicValue::State::INITIALIZED;
-        symbolTable[node.name] = val;
+        {
+            std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
+            symbolTable[node.name] = val;
+        }
     }
 
     void StaticAnalyzer::visit(IfStmt &node)
@@ -1020,17 +1050,20 @@ namespace lpp
     void StaticAnalyzer::visit(Function &node)
     {
         currentFunction = node.name;
-        symbolTable.clear();
-
-        // Check paradigm violations
-        checkParadigmViolation(node);
-
-        // Initialize parameters as initialized
-        for (auto &[paramName, paramType] : node.parameters)
         {
-            SymbolicValue val;
-            val.state = SymbolicValue::State::INITIALIZED;
-            symbolTable[paramName] = val;
+            std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
+            symbolTable.clear();
+
+            // Check paradigm violations
+            checkParadigmViolation(node);
+
+            // Initialize parameters as initialized
+            for (auto &[paramName, paramType] : node.parameters)
+            {
+                SymbolicValue val;
+                val.state = SymbolicValue::State::INITIALIZED;
+                symbolTable[paramName] = val;
+            }
         }
 
         // Build CFG for function
@@ -1310,7 +1343,10 @@ namespace lpp
         // Register the loop variable
         SymbolicValue val;
         val.state = SymbolicValue::State::INITIALIZED;
-        symbolTable[node.variable] = val;
+        {
+            std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
+            symbolTable[node.variable] = val;
+        }
 
         for (auto &stmt : node.body)
         {
@@ -1347,7 +1383,10 @@ namespace lpp
         {
             SymbolicValue val;
             val.state = SymbolicValue::State::INITIALIZED;
-            symbolTable[node.catchVariable] = val;
+            {
+                std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
+                symbolTable[node.catchVariable] = val;
+            }
         }
 
         // Analyze catch block
@@ -1380,6 +1419,7 @@ namespace lpp
         node.source->accept(*this);
 
         // Register all target variables as initialized
+        std::lock_guard<std::mutex> lock(symbolTableMutex); // BUG #346 fix
         for (const auto &target : node.targets)
         {
             SymbolicValue val;

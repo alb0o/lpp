@@ -61,7 +61,12 @@ namespace lpp
 
             if (line == "clear")
             {
-                system("clear || cls");
+                // BUG #345 fix: Use safe platform-specific commands
+#ifdef _WIN32
+                system("cls");
+#else
+                system("clear");
+#endif
                 continue;
             }
 
@@ -158,11 +163,15 @@ namespace lpp
         if (braces == 0 && parens == 0 && brackets == 0)
         {
             std::string trimmed = code;
-            // Remove trailing whitespace
-            trimmed.erase(trimmed.find_last_not_of(" \n\r\t") + 1);
-            if (!trimmed.empty() && trimmed.back() == ';')
+            // FIX BUG #350: Check npos before erase to prevent UB
+            size_t lastNonSpace = trimmed.find_last_not_of(" \n\r\t");
+            if (lastNonSpace != std::string::npos)
             {
-                return true;
+                trimmed.erase(lastNonSpace + 1);
+                if (!trimmed.empty() && trimmed.back() == ';')
+                {
+                    return true;
+                }
             }
         }
 

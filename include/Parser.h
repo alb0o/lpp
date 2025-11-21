@@ -5,9 +5,36 @@
 #include "AST.h"
 #include <vector>
 #include <memory>
+#include <set>
 
 namespace lpp
 {
+    // BUG #161 fix: RAII guard for parser state
+    class ParserStateGuard
+    {
+    public:
+        ParserStateGuard(size_t &pos, bool &panic)
+            : position(pos), panicMode(panic),
+              savedPos(pos), savedPanic(panic) {}
+
+        ~ParserStateGuard()
+        {
+            // Restore state on exception
+            if (std::uncaught_exceptions() > 0)
+            {
+                position = savedPos;
+                panicMode = savedPanic;
+            }
+        }
+
+        void commit() { savedPos = position; } // Don't restore
+
+    private:
+        size_t &position;
+        bool &panicMode;
+        size_t savedPos;
+        bool savedPanic;
+    };
 
     // FIX BUG #161: Parser lacks RAII guards for temporary allocations
     // TODO: Add scope guards for error recovery resources
@@ -42,8 +69,11 @@ namespace lpp
         std::string sourceCode;               // Original source for error context
         std::vector<std::string> sourceLines; // Split by line for easy access
 
-        // FIX BUG #308: Stack overflow protection
-        static constexpr size_t MAX_RECURSION_DEPTH = 500;
+        // BUG #333 fix: Track reported error locations to prevent duplicates
+        std::set<std::pair<int, int>> reportedErrors; // (line, column)
+
+        // FIX BUG #308 & #326: Stack overflow protection with safer limit
+        static constexpr size_t MAX_RECURSION_DEPTH = 100; // Reduced from 500 to prevent stack overflow
         size_t recursionDepth = 0;
 
         // Helper to safely parse doubles with validation

@@ -271,6 +271,13 @@ namespace lpp
         auto escapeString = [](const std::string &str) -> std::string
         {
             std::string result;
+            // BUG #335 fix: Check for overflow before allocation
+            constexpr size_t MAX_STRING_SIZE = 1'000'000'000; // 1GB limit
+            if (str.size() > MAX_STRING_SIZE / 2)
+            {
+                throw std::runtime_error("String too large for escaping (max " +
+                                         std::to_string(MAX_STRING_SIZE / 2) + " bytes)");
+            }
             result.reserve(str.size() * 2); // Preallocate for performance
             for (char c : str)
             {
@@ -336,11 +343,17 @@ namespace lpp
         // Nullish coalescing: a ?? b => ([&]() { auto __tmp = a; return __tmp != nullptr ? __tmp : b; })()
         if (node.op == "??")
         {
+            // BUG #344 fix: Validate that ?? is used with pointer/optional types
             output << "([&]() { auto __tmp = ";
             node.left->accept(*this);
-            output << "; if constexpr (std::is_pointer_v<decltype(__tmp)>) return __tmp != nullptr ? __tmp : ";
+            output << "; if constexpr (std::is_pointer_v<decltype(__tmp)> || "
+                   << "std::is_same_v<decltype(__tmp), std::optional<typename decltype(__tmp)::value_type>>) { "
+                   << "return __tmp != nullptr ? __tmp : ";
             node.right->accept(*this);
-            output << "; else return __tmp; })()";
+            output << "; } else { "
+                   << "static_assert(std::is_pointer_v<decltype(__tmp)>, "
+                   << "\"Nullish coalescing operator (??) requires pointer or optional type\"); "
+                   << "return __tmp; } })()";
             return;
         }
 
@@ -375,10 +388,11 @@ namespace lpp
     void Transpiler::visit(CallExpr &node)
     {
         output << node.function << "(";
-        for (size_t i = 0; i < node.arguments.size(); i++)
+        const size_t numArgs = node.arguments.size();
+        for (size_t i = 0; i < numArgs; i++)
         {
             node.arguments[i]->accept(*this);
-            if (i < node.arguments.size() - 1)
+            if (i < numArgs - 1)
             {
                 output << ", ";
             }
@@ -401,7 +415,8 @@ namespace lpp
         // Requires: Track function context (is async?) and lambda lifetime
         output << "[](";
 
-        for (size_t i = 0; i < node.parameters.size(); i++)
+        const size_t numParams = node.parameters.size();
+        for (size_t i = 0; i < numParams; i++)
         {
             auto &param = node.parameters[i];
             if (!param.second.empty())
@@ -417,7 +432,7 @@ namespace lpp
             }
             output << param.first;
 
-            if (i < node.parameters.size() - 1)
+            if (i < numParams - 1)
             {
                 output << ", ";
             }
@@ -532,8 +547,11 @@ namespace lpp
         {
             output << "1";
         }
-        // BUG #319 fix: Validate step != 0 to prevent infinite loop
+        // BUG #319 & #329 fix: Validate step != 0 and check for overflow
         output << "; if (__step == 0) throw std::invalid_argument(\"Range step cannot be zero\");";
+        // BUG #329 fix: Prevent overflow when creating very large ranges
+        output << " if (__step > 0 && __end > __start && (__end - __start) / __step > 10000000) throw std::overflow_error(\"Range would create more than 10M elements\");";
+        output << " if (__step < 0 && __start > __end && (__start - __end) / (-__step) > 10000000) throw std::overflow_error(\"Range would create more than 10M elements\");";
         output << " if (__step > 0) { for (int i = __start; i <= __end; i += __step) __range.push_back(i); }";
         output << " else { for (int i = __start; i >= __end; i += __step) __range.push_back(i); }";
         output << " return __range; })()";
@@ -706,10 +724,11 @@ namespace lpp
         // Tuple: (1, 2, 3) => std::make_tuple(1, 2, 3)
         // Empty tuple: () => std::make_tuple()
         output << "std::make_tuple(";
-        for (size_t i = 0; i < node.elements.size(); i++)
+        const size_t numElements = node.elements.size();
+        for (size_t i = 0; i < numElements; i++)
         {
             node.elements[i]->accept(*this);
-            if (i < node.elements.size() - 1)
+            if (i < numElements - 1)
             {
                 output << ", ";
             }
@@ -830,14 +849,15 @@ namespace lpp
         if (!node.unionTypes.empty())
         {
             // Union type: int | string -> std::variant<int, std::string>
-            // FIX BUG #110: Validate union type count
-            // TODO: Limit union types to reasonable number (e.g., 32 max)
-            // std::variant with too many types causes compilation slowdown
-            // Recommend using inheritance for large unions
+            // FIX BUG #110 & #327: Validate union type count
+            // Limit union types to reasonable number to prevent compilation slowdown
+            // std::variant with too many types causes exponential compilation time
             const size_t MAX_UNION_TYPES = 32;
             if (node.unionTypes.size() > MAX_UNION_TYPES)
             {
-                // Should emit warning during parsing
+                throw std::runtime_error("Union type exceeds maximum " +
+                                         std::to_string(MAX_UNION_TYPES) +
+                                         " types. Consider using inheritance or sealed classes.");
             }
 
             output << "std::variant<";
@@ -1103,16 +1123,15 @@ namespace lpp
             output << "template<";
 
             // Generic parameters
-            for (size_t i = 0; i < node.genericParams.size(); i++)
+            const size_t numGenericParams = node.genericParams.size();
+            for (size_t i = 0; i < numGenericParams; i++)
             {
                 output << "typename " << node.genericParams[i];
-                if (i < node.genericParams.size() - 1 || node.hasRestParam)
+                if (i < numGenericParams - 1 || node.hasRestParam)
                 {
                     output << ", ";
                 }
-            }
-
-            // Rest parameter as variadic template
+            } // Rest parameter as variadic template
             if (node.hasRestParam)
             {
                 output << "typename... RestArgs";
@@ -1164,6 +1183,13 @@ namespace lpp
         output << ") {\n";
 
         indentLevel++;
+
+        // BUG #332 fix: Track generator context for yield validation
+        bool wasInGenerator = inGeneratorContext;
+        if (node.isGenerator)
+        {
+            inGeneratorContext = true;
+        }
 
         // Convert rest parameters to vector for easy iteration
         // FIX BUG #58, #66: Use unique ID to prevent macro collisions
@@ -1237,6 +1263,9 @@ namespace lpp
             indent();
             output << "});\n";
         }
+
+        // BUG #332 fix: Restore generator context
+        inGeneratorContext = wasInGenerator;
 
         indentLevel--;
 
@@ -1354,8 +1383,11 @@ namespace lpp
         std::string nameAndParams = lppSignature.substr(0, arrowPos);
         std::string returnType = lppSignature.substr(arrowPos + 4);
 
-        // Extract method name
+        // FIX BUG #348: Validate parenPos before substr to prevent crash
         size_t parenPos = nameAndParams.find('(');
+        if (parenPos == std::string::npos)
+            return lppSignature; // Fallback: invalid signature format
+
         std::string methodName = nameAndParams.substr(0, parenPos);
         std::string params = nameAndParams.substr(parenPos);
 
@@ -1637,12 +1669,12 @@ namespace lpp
 
     void Transpiler::visit(YieldExpr &node)
     {
-        // FIX BUG #125: Validate generator context
-        // TODO: Check if in generator function scope
-        // - Track currentFunction->isGenerator
-        // - Error if yield outside generator
-        // - Validate generator return type is std::generator<T>
-        // Example: fn foo() { yield 42; } // ERROR: not generator
+        // FIX BUG #125 & #332: Validate generator context before allowing yield
+        if (!inGeneratorContext)
+        {
+            throw std::runtime_error("yield expression can only be used inside generator functions. "
+                                     "Use 'fn* functionName()' to declare a generator.");
+        }
 
         // co_yield requires C++20 coroutine support
         output << "co_yield ";
