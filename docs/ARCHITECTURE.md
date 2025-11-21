@@ -344,7 +344,7 @@ code --install-extension vscode-extension/lpp-language-0.1.0.vsix
 
 - **Language Spec:** `docs/FULL_SPEC.md`
 - **Static Analyzer:** `STATIC_ANALYZER.md`
-- **ES6+ Features:** `ES6_FEATURES.md`
+- **ES6+ Features:** [ADVANCED_FEATURES.md](ADVANCED_FEATURES.md)
 - **Quick Start:** `QUICKSTART.md`
 - **Roadmap:** `ROADMAP.md`
 

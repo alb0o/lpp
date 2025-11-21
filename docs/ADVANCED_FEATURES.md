@@ -375,7 +375,7 @@ See [PARADIGMS.md](PARADIGMS.md) for full details.
 - [FULL_SPEC.md](FULL_SPEC.md) - Complete language specification
 - [PARADIGMS.md](PARADIGMS.md) - Multi-paradigm programming guide
 - [QUICKSTART.md](QUICKSTART.md) - Getting started guide
-- [COMPLETE_PATTERN_CATALOG.md](COMPLETE_PATTERN_CATALOG.md) - Design patterns
+- [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) - Design patterns catalog
 
 ---
 

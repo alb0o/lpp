@@ -80,8 +80,11 @@ namespace lpp
 
         if (expansionCount >= MAX_EXPANSION_DEPTH)
         {
+            // BUG #341 fix: Throw error instead of just warning
             // Warn about possible recursive macro
-            std::cerr << "Warning: Macro expansion depth limit reached (" << MAX_EXPANSION_DEPTH << "). Possible recursive macro.\n";
+            std::cerr << "Error: Macro expansion depth limit exceeded (" << MAX_EXPANSION_DEPTH
+                      << "). Recursive or overly nested macro detected.\n";
+            throw std::runtime_error("Macro expansion depth exceeded: possible infinite recursion");
         }
 
         return result;

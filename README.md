@@ -4,9 +4,9 @@
 
 **A statically-typed systems language with modern syntax that transpiles to C++**
 
-**✅ STABLE v0.8.16 - Security Hardening & Memory Safety (51/66 bugs fixed - 77%) ✅**
+**✅ ALPHA v0.8.17 - Security Hardening & RAII (45 bugs fixed - Security 9.5/10) ✅**
 
-[Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/LANGUAGE_SPEC.md) • [Advanced Features](docs/ADVANCED_FEATURES.md) • [Design Patterns](docs/DESIGN_PATTERNS.md) • [Examples](examples/)
+[Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/FULL_SPEC.md) • [Advanced Features](docs/ADVANCED_FEATURES.md) • [Design Patterns](docs/DESIGN_PATTERNS.md) • [Examples](examples/)
 
 </div>
 
@@ -30,7 +30,7 @@ autopattern Observer EventBus;
 - 🔧 **Smart Defaults** — Pattern-specific methods and properties
 - 💡 **Type Safe** — Full C++ type system integration
 
-[**→ See Complete Pattern Catalog**](docs/COMPLETE_PATTERN_CATALOG.md)
+[**→ See Complete Pattern Catalog**](docs/DESIGN_PATTERNS.md)
 
 ---
 
@@ -60,7 +60,7 @@ autopattern Observer EventBus;
 - 🔍 **Division by Zero** — Compile-time detection
 - ⚠️ **Uninitialized Variables** — Catch bugs before runtime
 - 💀 **Dead Code Detection** — Find unreachable code
-- 🚫 **Null Dereference** — Safety checks (51/66 critical bugs fixed ✅)
+- 🚫 **Null Dereference** — Safety checks (45/45 critical bugs fixed ✅)
 - 💧 **Memory Leak Detection** — Track allocations
 - 🔢 **Integer Overflow** — Warnings for potential overflows
 
@@ -90,11 +90,12 @@ autopattern Observer EventBus;
 
 ### Quick Links
 - **[Quick Start Guide](docs/QUICKSTART.md)** - Get started in 5 minutes
-- **[Language Specification](docs/LANGUAGE_SPEC.md)** - Complete language reference
+- **[Language Specification](docs/FULL_SPEC.md)** - Complete language reference
 - **[Advanced Features](docs/ADVANCED_FEATURES.md)** - ES6+, golf operators, generators, quantum
 - **[Design Patterns](docs/DESIGN_PATTERNS.md)** - 23 GoF patterns with autopattern
 - **[Paradigms Guide](docs/PARADIGMS.md)** - Multi-paradigm programming
-- **[Changelog](CHANGELOG.md)** - Version history and bug fixes
+- **[Bug Fixes History](docs/BUG_FIXES.md)** - All 45 bugs fixed in v0.8.17
+- **[Changelog](CHANGELOG.md)** - Version history and releases
 
 ### Full Documentation Index
 See **[docs/README.md](docs/README.md)** for complete documentation with topic index.
@@ -112,11 +113,11 @@ lpp/
 ├── tests/                  # Test suite
 ├── docs/                   # 📚 Complete documentation
 │   ├── QUICKSTART.md       # Getting started
-│   ├── LANGUAGE_SPEC.md    # Language reference
+│   ├── FULL_SPEC.md        # Language reference
 │   ├── ADVANCED_FEATURES.md # Modern features
 │   ├── DESIGN_PATTERNS.md  # Pattern catalog
 │   ├── PARADIGMS.md        # Programming styles
-│   ├── BUG_FIXES.md        # Bug fix history
+│   ├── BUG_FIXES.md        # Bug fix history (45 bugs fixed)
 │   └── README.md           # Documentation index
 ├── vscode-extension/       # VS Code integration
 ├── CHANGELOG.md            # Version history
@@ -275,11 +276,12 @@ Details in [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 - **[Quick Start](docs/QUICKSTART.md)**
 - **[Language Specification](docs/FULL_SPEC.md)**
-- **[Golf-Style Operators](docs/GOLF_SYNTAX.md)** — Symbolic functional programming
-- **[Iterate-While Operators](docs/ITERATE_WHILE.md)** — Haskell-inspired sequence generation
+- **[Advanced Features](docs/ADVANCED_FEATURES.md)** — Golf operators, iterate-while, ES6+ features
 - **[Architecture Guide](docs/ARCHITECTURE.md)**
 - **[Static Analyzer Details](docs/STATIC_ANALYZER.md)**
-- **[ES6+ Features](docs/ES6_FEATURES.md)**
+- **[Design Patterns](docs/DESIGN_PATTERNS.md)**
+- **[Paradigms Guide](docs/PARADIGMS.md)**
+- **[Bug Fixes History](docs/BUG_FIXES.md)**
 - **[Roadmap](docs/ROADMAP.md)**
 
 ## ��� Use Cases

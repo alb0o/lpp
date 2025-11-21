@@ -72,14 +72,9 @@ namespace lpp
         std::vector<std::string> strings;                        // static parts
         std::vector<std::unique_ptr<Expression>> interpolations; // ${expr}
 
-        // FIX BUG #168: Constructor takes by-value then moves (double-move inefficiency)
-        // TODO: Change to rvalue references for true zero-copy
-        // - Constructor: TemplateLiteralExpr(std::vector<std::string>&& strs, ...)
-        // - Direct init: : strings(strs), interpolations(interp) {} // No std::move needed
-        // - Caller must: TemplateLiteralExpr(std::move(myStrings), ...)
-        // - Benefit: One move instead of two (parameter + member init)
-        TemplateLiteralExpr(std::vector<std::string> strs,
-                            std::vector<std::unique_ptr<Expression>> interp)
+        // BUG #168 fix: Use rvalue references to avoid double-move
+        TemplateLiteralExpr(std::vector<std::string> &&strs,
+                            std::vector<std::unique_ptr<Expression>> &&interp)
             : strings(std::move(strs)), interpolations(std::move(interp)) {}
         void accept(ASTVisitor &visitor) override;
     };

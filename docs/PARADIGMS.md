@@ -485,6 +485,6 @@ Paradigm enforcement in L++ strikes a balance between **flexibility and discipli
 - Start with `hybrid`, graduate to stricter modes as needed
 
 For more information:
-- [Golf Operators Documentation](GOLF_SYNTAX.md)
-- [Iterate-While Operators](ITERATE_WHILE.md)
+- [Golf Operators Documentation](ADVANCED_FEATURES.md#golf-operators)
+- [Iterate-While Operators](ADVANCED_FEATURES.md#iterate-while)
 - [Language Guide](../README.md)

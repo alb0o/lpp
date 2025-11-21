@@ -83,6 +83,9 @@ namespace lpp
         std::atomic<int> matchCounter{0};   // Thread-safe match counter
         std::atomic<int> quantumCounter{0}; // Thread-safe quantum counter
 
+        // BUG #332 fix: Track generator context for yield validation
+        bool inGeneratorContext = false;
+
         void indent();
         void writeLine(const std::string &line);
         std::string mapType(const std::string &lppType);

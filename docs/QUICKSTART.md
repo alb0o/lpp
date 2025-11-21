@@ -78,6 +78,6 @@ Compile and run:
 
 ## Next Steps
 
-- Read the full language specification: `docs/language_spec.md`
+- Read the full language specification: [FULL_SPEC.md](FULL_SPEC.md)
 - Explore more examples in the `examples/` folder
 - Contribute new features or report bugs
