@@ -152,7 +152,3 @@ T reduce(const std::vector<T>& vec, T init, F func) {
     return result;
 }
 
-int main() {
-    print("Hello, World!");
-    return 0;
-}

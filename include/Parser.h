@@ -3,6 +3,7 @@
 
 #include "Token.h"
 #include "AST.h"
+#include "PrecedenceTable.h"
 #include <vector>
 #include <memory>
 #include <set>
@@ -71,6 +72,9 @@ namespace lpp
 
         // BUG #333 fix: Track reported error locations to prevent duplicates
         std::set<std::pair<int, int>> reportedErrors; // (line, column)
+
+        // Precedence and notation system
+        NotationContext notationContext;
 
         // FIX BUG #308 & #326: Stack overflow protection with safer limit
         static constexpr size_t MAX_RECURSION_DEPTH = 100; // Reduced from 500 to prevent stack overflow
@@ -153,9 +157,13 @@ namespace lpp
         std::unique_ptr<Statement> exportStatement();
         std::unique_ptr<Statement> returnStatement();
         std::unique_ptr<Statement> expressionStatement();
+        std::unique_ptr<Statement> notationStatement();
+        std::unique_ptr<Statement> fixityDeclaration();
         std::vector<std::unique_ptr<Statement>> block(bool enableImplicitReturn = false);
 
         std::unique_ptr<Expression> expression();
+        std::unique_ptr<Expression> linearExpression();
+        std::unique_ptr<Expression> parsePrecedence(int minPrecedence);
         std::unique_ptr<Expression> nullishCoalescing();
         std::unique_ptr<Expression> logicalOr();
         std::unique_ptr<Expression> logicalAnd();

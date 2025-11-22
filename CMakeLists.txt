@@ -13,6 +13,7 @@ add_executable(lppc
     src/Token.cpp
     src/Lexer.cpp
     src/Parser.cpp
+    src/PrecedenceTable.cpp
     src/AST.cpp
     src/Transpiler.cpp
     src/StaticAnalyzer.cpp
@@ -32,6 +33,7 @@ add_executable(lpprepl
     src/Token.cpp
     src/Lexer.cpp
     src/Parser.cpp
+    src/PrecedenceTable.cpp
     src/AST.cpp
     src/Transpiler.cpp
     src/StaticAnalyzer.cpp

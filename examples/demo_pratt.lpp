@@ -1,0 +1,12 @@
+// Test Pratt parser with dynamic precedence
+fn main() -> int {
+    // Math mode: standard precedence
+    const result1 = 2 + 3 * 4  // 14
+    const result2 = 2 * 3 + 4  // 10
+    
+    print("Math mode test")
+    print(result1)
+    print(result2)
+    
+    return 0
+}

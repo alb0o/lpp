@@ -93,6 +93,13 @@ namespace lpp
         EXTERN, // FFI external declaration
         MOL,    // Molecule/Graph declaration
 
+        // Precedence/Notation System
+        NOTATION, // Notation block
+        INFIXL,   // Left-associative operator declaration
+        INFIXR,   // Right-associative operator declaration
+        INFIX,    // Non-associative operator declaration
+        LINEAR,   // Linear evaluation mode
+
         // Types
         TYPE_INT,
         TYPE_FLOAT,

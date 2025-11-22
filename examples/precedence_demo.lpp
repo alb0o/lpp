@@ -1,0 +1,17 @@
+#pragma paradigm hybrid
+
+// Demonstration of operator precedence system in L++
+fn main() -> int {
+    print("=== L++ Operator Precedence Demo ===")
+    print("")
+    
+    // Math mode (default): Standard precedence
+    print("Math mode (default):")
+    const a = 2 + 3 * 4
+    const b = 10 - 5 - 2
+    print(a)  // 14 (multiplication before addition)
+    print(b)  // 3 (left-associative subtraction)
+    print("")
+    
+    return 0
+}

@@ -537,9 +537,13 @@ namespace lpp
 
     std::unique_ptr<Statement> Parser::statement()
     {
+        if (match(TokenType::NOTATION))
+            return notationStatement();
+        if (match(TokenType::INFIXL) || match(TokenType::INFIXR) || match(TokenType::INFIX))
+            return fixityDeclaration();
         if (match(TokenType::QUANTUM))
             return quantumVarDeclaration();
-        if (match(TokenType::LET))
+        if (match(TokenType::LET) || match(TokenType::CONST))
             return varDeclaration();
         if (match(TokenType::IF))
             return ifStatement();
@@ -1102,6 +1106,14 @@ namespace lpp
 
     std::unique_ptr<Expression> Parser::nullishCoalescing()
     {
+        // If in linear/custom notation mode, use Pratt parser for dynamic precedence
+        NotationMode mode = notationContext.currentMode();
+        if (mode == NotationMode::LINEAR || mode == NotationMode::CUSTOM)
+        {
+            return parsePrecedence(0);
+        }
+
+        // Otherwise use fixed math mode precedence (recursive descent)
         auto expr = logicalOr();
 
         while (match(TokenType::QUESTION_QUESTION))
@@ -1559,6 +1571,12 @@ namespace lpp
 
     std::unique_ptr<Expression> Parser::primary()
     {
+        // linear(expr) - left-to-right evaluation
+        if (match(TokenType::LINEAR))
+        {
+            return linearExpression();
+        }
+
         // Entangle function: entangle(quantumVar, transformFn)
         if (match(TokenType::ENTANGLE))
         {
@@ -3516,6 +3534,196 @@ namespace lpp
         classDecl->designPattern = pattern;
 
         return classDecl;
+    }
+
+    // ========== Precedence System Implementation ==========
+
+    std::unique_ptr<Statement> Parser::notationStatement()
+    {
+        // notation math { ... } or notation linear { ... } or notation CustomName { ... }
+        Token notationType = consume(TokenType::IDENTIFIER, "Expected notation type (math, linear, or custom name)");
+
+        std::string mode = notationType.lexeme;
+
+        if (mode == "math")
+        {
+            notationContext.pushMath();
+        }
+        else if (mode == "linear")
+        {
+            notationContext.pushLinear();
+        }
+        else
+        {
+            notationContext.pushCustom(mode);
+        }
+
+        consume(TokenType::LBRACE, "Expected '{' after notation type");
+        auto body = block(false);
+
+        notationContext.pop();
+
+        // Notation blocks are just scope modifiers - we don't have a specific statement type
+        // Return a no-op statement for now
+        return std::make_unique<BreakStmt>(); // Placeholder
+    }
+    std::unique_ptr<Statement> Parser::fixityDeclaration()
+    {
+        // infixl 7 ⊗, ⊙
+        // infixr 5 **
+        // infix 4 ==
+
+        Token fixityToken = previous();
+        Associativity assoc = Associativity::LEFT;
+
+        if (fixityToken.type == TokenType::INFIXL)
+            assoc = Associativity::LEFT;
+        else if (fixityToken.type == TokenType::INFIXR)
+            assoc = Associativity::RIGHT;
+        else if (fixityToken.type == TokenType::INFIX)
+            assoc = Associativity::NONE;
+
+        // Parse precedence level
+        Token precToken = consume(TokenType::NUMBER, "Expected precedence level (0-100)");
+        int precedence = std::stoi(precToken.lexeme);
+
+        if (precedence < 0 || precedence > 100)
+        {
+            error("Precedence level must be between 0 and 100");
+            precedence = 50; // Default
+        }
+
+        // Parse operator names (comma-separated)
+        do
+        {
+            Token opToken = advance();
+            std::string opName = opToken.lexeme;
+
+            // Set fixity in current notation context
+            notationContext.currentMutable().setFixity(opName, precedence, assoc);
+
+        } while (match(TokenType::COMMA));
+
+        consume(TokenType::SEMICOLON, "Expected ';' after fixity declaration");
+
+        // Fixity is a declaration, not execution - return no-op
+        return std::make_unique<BreakStmt>(); // Placeholder
+    }
+    std::unique_ptr<Expression> Parser::linearExpression()
+    {
+        // linear(2 + 3 * 4) - evaluates left-to-right using temporary linear mode
+        consume(TokenType::LPAREN, "Expected '(' after 'linear'");
+
+        // Temporarily switch to linear mode
+        notationContext.pushLinear();
+
+        // Call nullishCoalescing which will detect LINEAR mode and use Pratt parser
+        auto expr = nullishCoalescing();
+
+        notationContext.pop();
+        consume(TokenType::RPAREN, "Expected ')' after linear expression");
+
+        return expr;
+    }
+
+    std::unique_ptr<Expression> Parser::parsePrecedence(int minPrecedence)
+    {
+        // Pratt parser with dynamic precedence from NotationContext
+        // Start with primary (no recursion to expression())
+        auto left = primary();
+
+        if (!left)
+            return nullptr;
+
+        while (!isAtEnd())
+        {
+            // Check if current token is a binary operator
+            TokenType op = peek().type;
+
+            // Get fixity info from current notation context
+            FixityInfo fixity = notationContext.current().getFixity(op);
+
+            // If precedence is too low, we're done
+            if (fixity.precedence < minPrecedence)
+                break;
+
+            // Check if it's actually an operator token we handle
+            if (op != TokenType::PLUS && op != TokenType::MINUS &&
+                op != TokenType::STAR && op != TokenType::SLASH &&
+                op != TokenType::PERCENT && op != TokenType::POWER &&
+                op != TokenType::EQUAL_EQUAL && op != TokenType::BANG_EQUAL &&
+                op != TokenType::LESS && op != TokenType::GREATER &&
+                op != TokenType::LESS_EQUAL && op != TokenType::GREATER_EQUAL &&
+                op != TokenType::AMP_AMP && op != TokenType::PIPE_PIPE &&
+                op != TokenType::AND && op != TokenType::OR &&
+                op != TokenType::DOT_DOT && op != TokenType::PIPE_GT &&
+                op != TokenType::DOT && op != TokenType::QUESTION_QUESTION)
+            {
+                break;
+            }
+
+            // Consume operator
+            Token opToken = advance();
+            std::string opStr = opToken.lexeme;
+
+            // Calculate next min precedence based on associativity
+            int nextMinPrec = fixity.precedence;
+            if (fixity.assoc == Associativity::LEFT)
+            {
+                nextMinPrec++; // Left-assoc: require strictly higher precedence on right
+            }
+            // Right-assoc: same precedence is OK on right
+
+            // Parse right side
+            auto right = parsePrecedence(nextMinPrec);
+
+            if (!right)
+            {
+                error("Expected expression after operator '" + opStr + "'");
+                return left;
+            }
+
+            // Special handling for specific operators
+            if (op == TokenType::DOT && check(TokenType::IDENTIFIER))
+            {
+                // Function composition: f . g
+                left = std::make_unique<BinaryExpr>(std::move(left), ".", std::move(right));
+            }
+            else if (op == TokenType::PIPE_GT)
+            {
+                // Pipeline: x |> f |> g (multi-stage)
+                // Collect all pipeline stages: f, g, h, ...
+                std::vector<std::unique_ptr<Expression>> stages;
+                stages.push_back(std::move(right));
+
+                // Continue collecting stages while we see |>
+                while (match(TokenType::PIPE_GT))
+                {
+                    auto stage = parsePrecedence(nextMinPrec);
+                    if (!stage)
+                    {
+                        error("Expected expression after '|>' in pipeline");
+                        break;
+                    }
+                    stages.push_back(std::move(stage));
+                }
+
+                // Create PipelineExpr with initial value and all stages
+                left = std::make_unique<PipelineExpr>(std::move(left), std::move(stages));
+            }
+            else if (op == TokenType::DOT_DOT)
+            {
+                // Range: 0..10
+                left = std::make_unique<BinaryExpr>(std::move(left), "..", std::move(right));
+            }
+            else
+            {
+                // Standard binary operator
+                left = std::make_unique<BinaryExpr>(std::move(left), opStr, std::move(right));
+            }
+        }
+
+        return left;
     }
 
 } // namespace lpp

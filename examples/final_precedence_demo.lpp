@@ -1,0 +1,20 @@
+#pragma paradigm hybrid
+
+fn main() -> int {
+    print("=== Operator Precedence Test ===");
+    print("");
+    
+    // Math mode (default)
+    const math1 = 2 + 3 * 4;  // 14
+    const math2 = 10 - 5 - 2;  // 3
+    print("Math mode:");
+    print(math1);
+    print(math2);
+    
+    // Linear expression (left-to-right)
+    const lin = linear(2 + 3 * 4);  // 20
+    print("Linear mode:");
+    print(lin);
+    
+    return 0;
+}

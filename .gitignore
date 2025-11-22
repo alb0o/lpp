@@ -41,6 +41,11 @@ commit-messages.txt
 RENUMBER_GUIDE.txt
 .copilot-memory.md
 
+# Enterprise documentation (confidential)
+docs/ENTERPRISE_FEATURES.md
+
 release/
 
 .copilot-memory-OLD.md
+
+tests/*

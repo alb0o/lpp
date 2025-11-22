@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    std::cout << "LPP Compiler v0.1\n";
+    std::cout << "LPP Compiler v0.8.18\n";
     std::cout << "Compiling: " << inputFile << "\n";
 
     // Read source code

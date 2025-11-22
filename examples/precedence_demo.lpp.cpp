@@ -153,6 +153,13 @@ T reduce(const std::vector<T>& vec, T init, F func) {
 }
 
 int main() {
-    print("Hello, World!");
+    print("=== L++ Operator Precedence Demo ===");
+    print("");
+    print("Math mode (default):");
+    auto a = (2 + (3 * 4));
+    auto b = ((10 - 5) - 2);
+    print(a);
+    print(b);
+    print("");
     return 0;
 }

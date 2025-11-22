@@ -1,0 +1,3 @@
+// Simple precedence test
+const a = 2 + 3 * 4
+io.print(a.toString())

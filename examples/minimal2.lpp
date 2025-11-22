@@ -1,0 +1,5 @@
+fn main() -> int {
+    const result = 2 + 3 * 4
+    io.print("Result: " + result.toString())
+    return 0
+}
