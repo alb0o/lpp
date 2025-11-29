@@ -46,6 +46,8 @@ void writeFile(const std::string &filename, const std::string &content)
 
 int main(int argc, char *argv[])
 {
+    std::cout << "L++ Compiler v0.8.19\n\n";
+
     if (argc < 2)
     {
         printUsage(argv[0]);

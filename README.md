@@ -4,7 +4,7 @@
 
 **A statically-typed systems language with modern syntax that transpiles to C++**
 
-**✅ ALPHA v0.8.17 - Security Hardening & RAII (45 bugs fixed - Security 9.5/10) ✅**
+**✅ ALPHA v0.8.19 - Stack Overflow Protection (BUG #300 fixed) ✅**
 
 [Quick Start](docs/QUICKSTART.md) • [Language Spec](docs/FULL_SPEC.md) • [Advanced Features](docs/ADVANCED_FEATURES.md) • [Design Patterns](docs/DESIGN_PATTERNS.md) • [Examples](examples/)
 

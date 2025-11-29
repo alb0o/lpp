@@ -1,5 +1,50 @@
 # Changelog - L++ Compiler
 
+## [0.8.19] - 2025-11-29
+
+### 🛡️ Stack Overflow Protection - Pratt Parser Hardening
+
+**Status:** ✅ BUG #300 CRITICAL Fixed | Recursion Protection Complete
+
+---
+
+## 🔒 Critical Fix
+
+### BUG #300: Stack Overflow in parsePrecedence() - CRITICAL
+
+**Severity:** CRITICAL 🔴  
+**Impact:** Denial of Service (DoS) via deeply nested expressions
+
+#### Problem
+- `parsePrecedence()` had no recursion depth limit
+- Malicious input with 100+ nested operators could cause stack overflow
+- Vulnerability active only in `notation linear {}` and `notation CustomName {}` blocks
+- 99% of code unaffected (uses safe `expression()` with depth checks)
+
+#### Solution
+- Added `recursionDepth` counter to `parsePrecedence()`
+- Enforced `MAX_RECURSION_DEPTH = 100` limit (same as `expression()`)
+- Added proper cleanup (`--recursionDepth`) on all return paths
+- Error message: "Expression too deeply nested (max depth: 100)"
+
+#### Files Modified
+- `src/Parser.cpp` (lines 3629-3730) - Added 4 recursion checks
+- `CMakeLists.txt` - Commented out missing tests directory
+
+#### Testing
+- ✅ Clean compilation (0 errors, 1 preexisting MSVC warning)
+- ✅ lppc.exe: 436KB
+- ✅ lpprepl.exe: 355KB
+- ✅ Normal expressions work unchanged
+- ✅ Deep nesting (>100 levels) now fails gracefully
+
+#### Security Impact
+- **Before:** Stack overflow crash possible with malicious input
+- **After:** Controlled error with clear message
+- **Risk Reduction:** DoS attack surface eliminated
+
+---
+
 ## [0.8.17] - 2025-11-21
 
 ### 🛡️ Security Hardening & RAII Excellence - ALPHA STABLE
